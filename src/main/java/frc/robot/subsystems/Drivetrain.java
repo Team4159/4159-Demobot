@@ -4,11 +4,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 
 public class Drivetrain extends SubsystemBase {
     private TalonFX leftMotor1, leftMotor2;
     private TalonFX rightMotor1, rightMotor2;
+    private MotorOutputConfigs motorConfig;
 
     public Drivetrain() {
         leftMotor1 = new TalonFX(1);
@@ -16,9 +19,11 @@ public class Drivetrain extends SubsystemBase {
         rightMotor1 = new TalonFX(3);
         rightMotor2 = new TalonFX(4);
 
-        //change to configs soon
-        leftMotor1.setInverted(true);
-        leftMotor2.setInverted(true);
+        motorConfig = new MotorOutputConfigs();
+        motorConfig.Inverted = InvertedValue.Clockwise_Positive;
+
+        leftMotor1.getConfigurator().apply(motorConfig);
+        leftMotor2.getConfigurator().apply(motorConfig);
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
