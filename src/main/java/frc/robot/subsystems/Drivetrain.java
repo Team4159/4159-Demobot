@@ -16,7 +16,9 @@ public class Drivetrain extends SubsystemBase {
         rightMotor1 = new TalonFX(3);
         rightMotor2 = new TalonFX(4);
 
-        //set motors inverted in config idk
+        //change to configs soon
+        leftMotor1.setInverted(true);
+        leftMotor2.setInverted(true);
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
