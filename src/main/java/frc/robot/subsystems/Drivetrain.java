@@ -8,16 +8,18 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
+import frc.robot.Constants;
+
 public class Drivetrain extends SubsystemBase {
     private TalonFX leftMotor1, leftMotor2;
     private TalonFX rightMotor1, rightMotor2;
     private MotorOutputConfigs motorConfig;
 
     public Drivetrain() {
-        leftMotor1 = new TalonFX(1);
-        leftMotor2 = new TalonFX(2);
-        rightMotor1 = new TalonFX(3);
-        rightMotor2 = new TalonFX(4);
+        leftMotor1 = new TalonFX(Constants.DrivetrainConstants.leftMotor1ID);
+        leftMotor2 = new TalonFX(Constants.DrivetrainConstants.leftMotor2ID);
+        rightMotor1 = new TalonFX(Constants.DrivetrainConstants.rightMotor1ID);
+        rightMotor2 = new TalonFX(Constants.DrivetrainConstants.rightMotor2ID);
 
         motorConfig = new MotorOutputConfigs();
         motorConfig.Inverted = InvertedValue.Clockwise_Positive;
