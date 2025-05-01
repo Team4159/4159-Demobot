@@ -23,4 +23,20 @@ public final class Constants {
     public static final int rightMotor1ID = 2;
     public static final int rightMotor2ID = 3;
   }
+
+  public static class TurretConstants {
+    public static final int kTurretSparkId = 4;
+    public static final int kClockwisePort = 3;
+    public static final int kCounterClockwisePort = 4;
+    
+    public static enum TurretState {
+      CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), OFF(0);
+      
+      public double motorSpeed;
+
+      private TurretState(double speed) {
+        motorSpeed = speed;
+      }
+    }
+  }
 }

@@ -5,11 +5,13 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.TurretConstants.TurretState;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -25,6 +27,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Drivetrain drivetrain = new Drivetrain();
+  private final Turret turret = new Turret();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -32,6 +35,7 @@ public class RobotContainer {
 
   private final CommandJoystick leftStick = new CommandJoystick(0);
   private final CommandJoystick rightStick = new CommandJoystick(1);
+  private final CommandJoystick secondaryStick = new CommandJoystick(2);
 
   private final Drive drive = drivetrain.new Drive(drivetrain, leftStick, rightStick);
 
@@ -59,6 +63,11 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    secondaryStick.button(Constants.TurretConstants.kClockwisePort)
+        .whileTrue(turret.new TurnTurret(TurretState.CLOCKWISE));
+    secondaryStick.button(Constants.TurretConstants.kCounterClockwisePort)
+        .whileTrue(turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
   }
 
   /**
