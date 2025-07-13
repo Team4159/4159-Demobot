@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,5 +17,32 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+  }
+
+  // enum for shooter
+  public static class ShooterConstants {
+    //IDs for all motors
+    public static final int leftShooterControllerPort = 5;
+    public static final int rightShooterControllerPort = 6;
+    public static final int hoodAdjusterControllerPort = 7;
+
+    // hood angle ranges
+    public static final double throttleMin = -1;
+    public static final double throttleMax = 1;
+    public static final double hoodAngleMin = 0;
+    public static final double hoodAngleMax = 70;
+
+    //----- tolerances: so if the motors/whatnot are a bit off, it'll still work------
+    // pitch refers to the angle
+    public static final double pitchTolerance = Units.degreesToRadians(5);
+    // used the value for spinTolerance from FRC-2024 
+    public static final double spinTolerance = Math.PI/8;
+
+    // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
+    // efficient to have a range instead of set states
+    // REPLACE the values below with actual mins and maxes later (after testing).
+    public static final double minPitch = Units.degreesToRadians(14);
+    public static final double maxPitch = Units.rotationsToRadians(0.2);
+
   }
 }
