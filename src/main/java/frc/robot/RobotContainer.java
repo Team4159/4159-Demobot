@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.TurretConstants.TurretState;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.lib.FluentTrigger;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -64,10 +65,10 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    secondaryStick.button(Constants.TurretConstants.kClockwisePort)
-        .whileTrue(turret.new TurnTurret(TurretState.CLOCKWISE));
-    secondaryStick.button(Constants.TurretConstants.kCounterClockwisePort)
-        .whileTrue(turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
+    new FluentTrigger()
+      .setDefault(turret.new TurnTurret(TurretState.IDLE))
+      .bind(secondaryStick.button(Constants.TurretConstants.kClockwisePort), turret.new TurnTurret(TurretState.CLOCKWISE))
+      .bind(secondaryStick.button(Constants.TurretConstants.kCounterClockwisePort), turret.new TurnTurret(TurretState.COUNTER_CLOCKWISE));
   }
 
   /**
