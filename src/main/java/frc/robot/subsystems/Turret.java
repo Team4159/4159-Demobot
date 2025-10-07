@@ -6,7 +6,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+<<<<<<< HEAD
 import edu.wpi.first.math.util.Units;
+=======
+>>>>>>> 2782f6be9ec5e8755262fdd838b19ffac37e3b93
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -36,19 +39,31 @@ public class Turret extends SubsystemBase {
     }
 
     public class AutoAlign extends Command {
+<<<<<<< HEAD
+=======
+        private double goalX;
+>>>>>>> 2782f6be9ec5e8755262fdd838b19ffac37e3b93
 
         public AutoAlign() {
         }
         
         @Override
         public void initialize() {
+<<<<<<< HEAD
+=======
+            goalX = turretMotor.getEncoder().getPosition() - LimelightHelpers.getTX("limelight");
+>>>>>>> 2782f6be9ec5e8755262fdd838b19ffac37e3b93
         }
 
         @Override
         public void execute() {
+<<<<<<< HEAD
             double error = Units.degreesToRadians(LimelightHelpers.getTX("limelight"));
             double position = turretMotor.getEncoder().getPosition();
             turretMotor.set(turretPid.calculate(position, position + error));
+=======
+            turretMotor.set(turretPid.calculate(turretMotor.getEncoder().getPosition(), goalX));
+>>>>>>> 2782f6be9ec5e8755262fdd838b19ffac37e3b93
         }
 
         @Override
