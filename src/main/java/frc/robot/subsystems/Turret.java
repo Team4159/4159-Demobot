@@ -39,10 +39,11 @@ public class Turret extends SubsystemBase {
 
 
     public class TurnTurret extends Command {
-        public TurretState turretState;
+        private final TurretState turretState;
 
         public TurnTurret(TurretState turretState) {
             this.turretState = turretState;
+            addRequirements(Turret.this);
         }
 
         @Override
@@ -56,6 +57,7 @@ public class Turret extends SubsystemBase {
         double initializeTime;
 
         public AutoAlign() {
+            addRequirements(Turret.this);
         }
         
         @Override
