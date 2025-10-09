@@ -67,8 +67,8 @@ public class RobotContainer {
 
     new FluentTrigger()
       .setDefault(turret.new TurnTurret(TurretState.IDLE))
-      .bind(secondaryStick.button(Constants.TurretConstants.kClockwisePort), turret.new TurnTurret(TurretState.CLOCKWISE))
-      .bind(secondaryStick.button(Constants.TurretConstants.kCounterClockwisePort), turret.new TurnTurret(TurretState.COUNTER_CLOCKWISE));
+      .bind(secondaryStick.button(Constants.TurretConstants.kClockwiseButton), turret.new TurnTurret(TurretState.CLOCKWISE))
+      .bind(secondaryStick.button(Constants.TurretConstants.kCounterClockwiseButton), turret.new TurnTurret(TurretState.COUNTER_CLOCKWISE));
   }
 
   /**
