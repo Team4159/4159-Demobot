@@ -8,12 +8,12 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.TurretConstants.TurretState;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.lib.FluentTrigger;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -33,11 +33,10 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-  private final CommandJoystick leftStick = new CommandJoystick(0);
-  private final CommandJoystick rightStick = new CommandJoystick(1);
-  private final CommandJoystick secondaryStick = new CommandJoystick(2);
+  private final CommandXboxController primaryController = new CommandXboxController(0);
+  private final CommandXboxController secondaryController = new CommandXboxController(1);
 
-  private final Drive drive = drivetrain.new Drive(drivetrain, leftStick, rightStick);
+  private final Drive drive = drivetrain.new Drive(drivetrain, primaryController);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -64,10 +63,10 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
 
-    secondaryStick.button(Constants.TurretConstants.kClockwisePort)
-        .whileTrue(turret.new TurnTurret(TurretState.CLOCKWISE));
-    secondaryStick.button(Constants.TurretConstants.kCounterClockwisePort)
-        .whileTrue(turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
+    new FluentTrigger()
+      .setDefault(turret.new TurnTurret(TurretState.IDLE))
+      .bind(secondaryController.leftBumper(), turret.new TurnTurret(TurretState.CLOCKWISE))
+      .bind(secondaryController.rightBumper(), turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
   }
 
   /**
