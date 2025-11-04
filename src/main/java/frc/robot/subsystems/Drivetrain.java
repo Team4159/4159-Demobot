@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 import frc.robot.Constants;
+import frc.robot.Constants.ArcadeDriveConstants;
 
 public class Drivetrain extends SubsystemBase {
     private TalonFX leftMotor1, leftMotor2;
@@ -75,39 +76,45 @@ public class Drivetrain extends SubsystemBase {
 
         @Override
         public void execute() {
-            double x = controller.getLeftX();
-            double y = controller.getLeftY();
-            double direction = Math.signum(y);
-            double magnitude = Math.hypot(x, y);
-            double angle = Math.atan2(Math.abs(y), Math.abs(x));
-            double angleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(angle));
-            double angleFromHorizontal = Math.abs(angle);
-            double translationThresholdAngle = Units.degreesToRadians(15);
-            double rotationThresholdAngle = Units.degreesToRadians(15);
+            double inputX = controller.getLeftX();
+            double inputY = controller.getLeftY();
+            double direction = Math.signum(inputY);
+            double magnitude = Math.hypot(inputX, inputY);
 
-            double left = 0;
-            double right = 0;
-            if (angleFromVertical <= translationThresholdAngle) {
-                left = magnitude * direction;
-                right = left;
+            double angleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
+            double angleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(angleFromHorizontal));
+
+            double leftDirection = 0, rightDirection = 0;
+            if (magnitude < ArcadeDriveConstants.kInputDeadzone) {
+                // do nothing
+            } else if (angleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
+                leftDirection = direction;
+                rightDirection = direction;
             } else {
                 double rotationAlpha;
-                if (angleFromHorizontal <= rotationThresholdAngle) {
+                if (angleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
                     rotationAlpha = 0;
                 } else {
-                    double range = Units.degreesToRadians(90) - rotationThresholdAngle - translationThresholdAngle;
-                    rotationAlpha = direction * ((angle - rotationThresholdAngle) / range);
+                    double range = Units.degreesToRadians(90) - ArcadeDriveConstants.kRotationBufferAngle
+                            - ArcadeDriveConstants.kTranslationBufferAngle;
+                    rotationAlpha = direction
+                            * ((angleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle) / range);
                 }
-                left = Math.min(1, -1 + Math.max(0, rotationAlpha * 2));
-                right = Math.min(1, -1 + (rotationAlpha + 1) * 2);
-                if (x < 0) {
-                    double temp = left;
-                    left = right;
-                    right = temp;
+                leftDirection = -1 + Math.max(0, rotationAlpha * 2);
+                rightDirection = -1 + ((rotationAlpha + 1) * 2);
+                if (inputX < 0) {
+                    double temp = leftDirection;
+                    leftDirection = rightDirection;
+                    rightDirection = temp;
                 }
             }
+
+            double left = leftDirection * magnitude;
+            left = Math.min(1, Math.max(-1, left));
+            double right = rightDirection * magnitude;
+            right = Math.min(1, Math.max(-1, right));
+
             Drivetrain.this.drive(left, right);
-            System.out.println(left + " " + right);
         }
     }
 }
