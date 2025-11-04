@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -51,16 +52,62 @@ public class Drivetrain extends SubsystemBase {
             this.controller = controller;
 
             addRequirements(drivetrain);
-        } 
+        }
 
         @Override
         public void execute() {
             drivetrain.drive(controller.getLeftY(), controller.getRightY());
         }
-        
+
         @Override
         public void end(boolean interrupted) {
             drivetrain.stop();
+        }
+    }
+
+    public class ArcadeDrive extends Command {
+        private CommandXboxController controller;
+
+        public ArcadeDrive(CommandXboxController controller) {
+            this.controller = controller;
+            addRequirements(Drivetrain.this);
+        }
+
+        @Override
+        public void execute() {
+            double x = controller.getLeftX();
+            double y = controller.getLeftY();
+            double direction = Math.signum(y);
+            double magnitude = Math.hypot(x, y);
+            double angle = Math.atan2(Math.abs(y), Math.abs(x));
+            double angleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(angle));
+            double angleFromHorizontal = Math.abs(angle);
+            double translationThresholdAngle = Units.degreesToRadians(15);
+            double rotationThresholdAngle = Units.degreesToRadians(15);
+
+            double left = 0;
+            double right = 0;
+            if (angleFromVertical <= translationThresholdAngle) {
+                left = magnitude * direction;
+                right = left;
+            } else {
+                double rotationAlpha;
+                if (angleFromHorizontal <= rotationThresholdAngle) {
+                    rotationAlpha = 0;
+                } else {
+                    double range = Units.degreesToRadians(90) - rotationThresholdAngle - translationThresholdAngle;
+                    rotationAlpha = direction * ((angle - rotationThresholdAngle) / range);
+                }
+                left = Math.min(1, -1 + Math.max(0, rotationAlpha * 2));
+                right = Math.max(-1, -1 - Math.min(0, rotationAlpha * 2));
+                if (x < 0) {
+                    double temp = left;
+                    left = right;
+                    right = temp;
+                }
+            }
+            Drivetrain.this.drive(left, right);
+            System.out.println(left + " " + right);
         }
     }
 }

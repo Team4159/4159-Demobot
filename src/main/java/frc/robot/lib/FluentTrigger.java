@@ -70,7 +70,12 @@ public class FluentTrigger {
         }
 
         int activeState = activeStateQueue.get(activeStateQueue.size() - 1);
+        Command oldActiveCommand = activeCommand;
         activeCommand = triggerCommandBindList.get(activeState).command;
+        boolean activeCommandChanged = (activeCommand != oldActiveCommand);
+        if (activeCommandChanged == true) {
+            oldActiveCommand.cancel();
+        }
         if (activeCommand.isScheduled() == false) {
             activeCommand.schedule();
         }
