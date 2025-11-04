@@ -34,7 +34,6 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   private final CommandXboxController primaryController = new CommandXboxController(0);
-  private final CommandXboxController secondaryController = new CommandXboxController(1);
 
   private final Drive drive = drivetrain.new Drive(drivetrain, primaryController);
 
@@ -65,8 +64,8 @@ public class RobotContainer {
 
     new FluentTrigger()
       .setDefault(turret.new TurnTurret(TurretState.IDLE))
-      .bind(secondaryController.leftBumper(), turret.new TurnTurret(TurretState.CLOCKWISE))
-      .bind(secondaryController.rightBumper(), turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
+      .bind(primaryController.leftBumper(), turret.new TurnTurret(TurretState.CLOCKWISE))
+      .bind(primaryController.rightBumper(), turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
   }
 
   /**
