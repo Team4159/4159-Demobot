@@ -99,7 +99,7 @@ public class Drivetrain extends SubsystemBase {
                     rotationAlpha = direction * ((angle - rotationThresholdAngle) / range);
                 }
                 left = Math.min(1, -1 + Math.max(0, rotationAlpha * 2));
-                right = Math.max(-1, -1 - Math.min(0, rotationAlpha * 2));
+                right = Math.min(1, -1 + (rotationAlpha + 1) * 2);
                 if (x < 0) {
                     double temp = left;
                     left = right;
