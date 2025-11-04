@@ -83,24 +83,24 @@ public class Drivetrain extends SubsystemBase {
                     (rawMagnitude - ArcadeDriveConstants.kInputDeadzone) / (1 - ArcadeDriveConstants.kInputDeadzone));
 
             // absolute angles
-            double angleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
-            double angleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(angleFromHorizontal));
+            double absoluteAngleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
+            double absoluteAngleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(absoluteAngleFromHorizontal));
 
             double leftDirection = 0, rightDirection = 0;
             if (rawMagnitude < ArcadeDriveConstants.kInputDeadzone) {
                 // do nothing
-            } else if (angleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
+            } else if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
                 leftDirection = direction;
                 rightDirection = direction;
             } else {
                 double rotationAlpha;
-                if (angleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
+                if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
                     rotationAlpha = 0;
                 } else {
                     // range of analog motion that is outside of the buffer zones
                     double angleRange = Units.degreesToRadians(90) - (ArcadeDriveConstants.kRotationBufferAngle
                             + ArcadeDriveConstants.kTranslationBufferAngle);
-                    double relativeAngle = angleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
+                    double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
                     rotationAlpha = direction * (relativeAngle / angleRange); // range: [-1, 1]
                 }
 

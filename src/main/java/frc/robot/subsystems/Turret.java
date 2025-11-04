@@ -1,28 +1,37 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
-
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.TurretConstants.TurretState;
 
 public class Turret extends SubsystemBase {
-    private SparkMax turretSpark;
+    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
+    private final SparkClosedLoopController turretMotorController = turretMotor.getClosedLoopController();
+    {
+        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kResetSafeParameters, null);
+    }
 
     public Turret() {
-        turretSpark = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
+
     }
 
     private void setState(TurretState turretState) {
-        turretSpark.set(turretState.motorSpeed);
+        turretMotor.set(turretState.motorSpeed);
     }
 
     public class TurnTurret extends Command {
-        public TurretState turretState;
+        private TurretState turretState;
 
         public TurnTurret(TurretState turretState) {
             this.turretState = turretState;
@@ -36,7 +45,39 @@ public class Turret extends SubsystemBase {
 
         @Override
         public void end(boolean i) {
-            Turret.this.setState(TurretState.IDLE);        
+            Turret.this.setState(TurretState.IDLE);
+        }
+    }
+
+    public class TurretPositionControl extends Command {
+        private final CommandXboxController controller;
+
+        public TurretPositionControl(CommandXboxController controller) {
+            this.controller = controller;
+            addRequirements(Turret.this);
+        }
+
+        @Override
+        public void execute() {
+            double inputX = controller.getRightX();
+            double inputY = controller.getRightY();
+            double magnitude = Math.hypot(inputX, inputY);
+
+            if (magnitude > TurretConstants.kInputDeadzone) {
+                double angle = Math.atan2(inputY, inputX);
+                // also normalizes angle while converting
+                // note:negative 90 degrees is up
+                double angleFromVertical = ((angle + Units.degreesToRadians(90 + 180)) % Units.degreesToRadians(360)) - Units.degreesToRadians(180);
+                
+                // get turret position in radians
+                double positionRadians = Math.min(Units.rotationsToRadians(TurretConstants.kTurretForwardLimit),
+                        Math.max(-Units.rotationsToRadians(TurretConstants.kTurretReverseLimit), angleFromVertical));
+
+                // convert turret position to rotations
+                double positionRotations = Units.radiansToRotations(positionRadians);
+
+                turretMotorController.setReference(positionRotations, ControlType.kPosition);
+            }
         }
     }
 }

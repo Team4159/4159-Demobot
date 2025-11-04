@@ -5,12 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.TurretConstants.TurretState;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.lib.FluentTrigger;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
+import frc.robot.subsystems.Turret.TurretPositionControl;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,12 +35,14 @@ public class RobotContainer {
   private final CommandXboxController primaryController = new CommandXboxController(0);
 
   private final ArcadeDrive drive = drivetrain.new ArcadeDrive(primaryController);
+  private final TurretPositionControl turnTurret = turret.new TurretPositionControl(primaryController);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
     drivetrain.setDefaultCommand(drive);
+    turret.setDefaultCommand(turnTurret);
   }
 
   /**
@@ -61,11 +62,6 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-
-    new FluentTrigger()
-      .setDefault(turret.new TurnTurret(TurretState.IDLE))
-      .bind(primaryController.leftBumper(), turret.new TurnTurret(TurretState.CLOCKWISE))
-      .bind(primaryController.rightBumper(), turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
   }
 
   /**
