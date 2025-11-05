@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -76,12 +77,10 @@ public class Drivetrain extends SubsystemBase {
         public void execute() {
             double inputX = controller.getLeftX();
             double inputY = controller.getLeftY();
-            double direction = Math.signum(inputY);
+            double forwardDirection = Math.signum(inputY);
             double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
-            // adjusts range to start at 0 instead of starting at the deadzone
-            double correctedMagnitude = Math.max(0,
-                    (rawMagnitude - ArcadeDriveConstants.kInputDeadzone) / (1 - ArcadeDriveConstants.kInputDeadzone));
-
+            double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.kInputDeadzone, 1);
+            
             // absolute angles
             double absoluteAngleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
             double absoluteAngleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(absoluteAngleFromHorizontal));
@@ -90,27 +89,27 @@ public class Drivetrain extends SubsystemBase {
             if (rawMagnitude < ArcadeDriveConstants.kInputDeadzone) {
                 // do nothing
             } else if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
-                leftDirection = direction;
-                rightDirection = direction;
+                leftDirection = forwardDirection;
+                rightDirection = forwardDirection;
             } else {
                 double rotationAlpha;
                 if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
                     rotationAlpha = 0;
                 } else {
                     // range of analog motion that is outside of the buffer zones
-                    double angleRange = Units.degreesToRadians(90) - (ArcadeDriveConstants.kRotationBufferAngle
+                    double analogRange = Units.degreesToRadians(90) - (ArcadeDriveConstants.kRotationBufferAngle
                             + ArcadeDriveConstants.kTranslationBufferAngle);
                     double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
-                    rotationAlpha = direction * (relativeAngle / angleRange); // range: [-1, 1]
+                    rotationAlpha = forwardDirection * (relativeAngle / analogRange); // rotationAlpha range: [-1, 1]
                 }
 
                 // get directions
                 // 90 to 0 degrees: lerp from (-1, -1) to (-1, 1)
                 // 0 to -90 degrees: lerp from (-1, 1) to (1, 1)
                 leftDirection = -1 + Math.max(0, rotationAlpha * 2);
-                leftDirection = Math.min(1, Math.max(-1, leftDirection));
+                leftDirection = MathUtil.clamp(leftDirection, -1, 1);
                 rightDirection = -1 + ((rotationAlpha + 1) * 2);
-                rightDirection = Math.min(1, Math.max(-1, rightDirection));
+                rightDirection = MathUtil.clamp(rightDirection, -1, 1);
 
                 // reverse inputs if the input is leftward
                 if (inputX < 0) {
@@ -122,9 +121,9 @@ public class Drivetrain extends SubsystemBase {
 
             // get speeds based off direction and input magnitude
             double leftSpeed = leftDirection * correctedMagnitude;
-            leftSpeed = Math.min(1, Math.max(-1, leftSpeed));
+            leftSpeed = MathUtil.clamp(leftSpeed, -1, 1);
             double rightSpeed = rightDirection * correctedMagnitude;
-            rightSpeed = Math.min(1, Math.max(-1, rightSpeed));
+            rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
 
             Drivetrain.this.drive(leftSpeed, rightSpeed);
         }

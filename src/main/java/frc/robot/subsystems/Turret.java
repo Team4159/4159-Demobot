@@ -6,6 +6,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,7 +18,8 @@ import frc.robot.Constants.TurretConstants.TurretState;
 public class Turret extends SubsystemBase {
     private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
     {
-        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kNoPersistParameters);
     }
 
     public Turret() {
@@ -75,16 +77,17 @@ public class Turret extends SubsystemBase {
                         - Units.degreesToRadians(180);
 
                 // get turret position in radians
-                double positionRadians = Math.min(Units.rotationsToRadians(TurretConstants.kTurretForwardLimit),
-                        Math.max(-Units.rotationsToRadians(TurretConstants.kTurretReverseLimit), angleFromVertical));
+                double positionRadians = MathUtil.clamp(angleFromVertical,
+                        Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit),
+                        Units.rotationsToRadians(TurretConstants.kTurretForwardLimit));
 
                 // convert turret position to rotations
                 setpoint = Units.radiansToRotations(positionRadians);
             }
-            
+
             double voltage = TurretConstants.kTurretProfiledPIDController
-                        .calculate(turretMotor.getEncoder().getPosition(), setpoint);
-                turretMotor.setVoltage(voltage);
+                    .calculate(turretMotor.getEncoder().getPosition(), setpoint);
+            turretMotor.setVoltage(voltage);
         }
     }
 }
