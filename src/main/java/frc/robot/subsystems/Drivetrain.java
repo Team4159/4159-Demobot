@@ -77,7 +77,7 @@ public class Drivetrain extends SubsystemBase {
             double inputX = controller.getLeftX();
             double inputY = controller.getLeftY();
             double direction = Math.signum(inputY);
-            double rawMagnitude = Math.hypot(inputX, inputY);
+            double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
             // adjusts range to start at 0 instead of starting at the deadzone
             double correctedMagnitude = Math.max(0,
                     (rawMagnitude - ArcadeDriveConstants.kInputDeadzone) / (1 - ArcadeDriveConstants.kInputDeadzone));

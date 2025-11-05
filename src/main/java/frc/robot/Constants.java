@@ -31,7 +31,7 @@ public final class Constants {
   public static class ArcadeDriveConstants {
     public static final double kTranslationBufferAngle = Units.degreesToRadians(15);
     public static final double kRotationBufferAngle = Units.degreesToRadians(15);
-    public static final double kInputDeadzone = 0.2;
+    public static final double kInputDeadzone = 0.3;
   }
 
   public static class DrivetrainConstants {
@@ -56,8 +56,8 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-      0.1, 0.1, 0,
-      new TrapezoidProfile.Constraints(50, 150)
+      10, 5, 0,
+      new TrapezoidProfile.Constraints(80, 40)
     );
 
     public static enum TurretState {

@@ -1,9 +1,8 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -17,9 +16,8 @@ import frc.robot.Constants.TurretConstants.TurretState;
 
 public class Turret extends SubsystemBase {
     private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
-    private final SparkClosedLoopController turretMotorController = turretMotor.getClosedLoopController();
     {
-        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kResetSafeParameters, null);
+        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public Turret() {
@@ -51,10 +49,16 @@ public class Turret extends SubsystemBase {
 
     public class TurretPositionControl extends Command {
         private final CommandXboxController controller;
+        private double setpoint = 0;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
             addRequirements(Turret.this);
+        }
+
+        @Override
+        public void initialize() {
+            setpoint = 0;
         }
 
         @Override
@@ -75,11 +79,12 @@ public class Turret extends SubsystemBase {
                         Math.max(-Units.rotationsToRadians(TurretConstants.kTurretReverseLimit), angleFromVertical));
 
                 // convert turret position to rotations
-                double positionRotations = Units.radiansToRotations(positionRadians);
-                double voltage = TurretConstants.kTurretProfiledPIDController
-                        .calculate(turretMotor.getEncoder().getPosition(), positionRotations);
-                turretMotorController.setReference(voltage, ControlType.kVoltage);
+                setpoint = Units.radiansToRotations(positionRadians);
             }
+            
+            double voltage = TurretConstants.kTurretProfiledPIDController
+                        .calculate(turretMotor.getEncoder().getPosition(), setpoint);
+                turretMotor.setVoltage(voltage);
         }
     }
 }
