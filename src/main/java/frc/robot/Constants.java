@@ -7,6 +7,8 @@ package frc.robot;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -42,6 +44,7 @@ public final class Constants {
   public static class TurretConstants {
     public static final int kTurretSparkId = 4;
     public static final double kInputDeadzone = 0.5;
+
     public static final double kTurretForwardLimit = Units.degreesToRotations(30);
     public static final double kTurretReverseLimit = Units.degreesToRotations(30);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
@@ -51,6 +54,11 @@ public final class Constants {
           .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretForwardLimit)
           .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretReverseLimit);
     }
+
+    public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
+      0.1, 0.1, 0,
+      new TrapezoidProfile.Constraints(50, 150)
+    );
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);

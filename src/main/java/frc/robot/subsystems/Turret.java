@@ -67,16 +67,18 @@ public class Turret extends SubsystemBase {
                 double angle = Math.atan2(inputY, inputX);
                 // also normalizes angle while converting
                 // note:negative 90 degrees is up
-                double angleFromVertical = ((angle + Units.degreesToRadians(90 + 180)) % Units.degreesToRadians(360)) - Units.degreesToRadians(180);
-                
+                double angleFromVertical = ((angle + Units.degreesToRadians(90 + 180)) % Units.degreesToRadians(360))
+                        - Units.degreesToRadians(180);
+
                 // get turret position in radians
                 double positionRadians = Math.min(Units.rotationsToRadians(TurretConstants.kTurretForwardLimit),
                         Math.max(-Units.rotationsToRadians(TurretConstants.kTurretReverseLimit), angleFromVertical));
 
                 // convert turret position to rotations
                 double positionRotations = Units.radiansToRotations(positionRadians);
-
-                turretMotorController.setReference(positionRotations, ControlType.kPosition);
+                double voltage = TurretConstants.kTurretProfiledPIDController
+                        .calculate(turretMotor.getEncoder().getPosition(), positionRotations);
+                turretMotorController.setReference(voltage, ControlType.kVoltage);
             }
         }
     }
