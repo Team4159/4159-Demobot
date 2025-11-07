@@ -7,7 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.lib.HIDRumble.RumbleState;
+import frc.robot.lib.HIDRumble.RumbleManager;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Turret.TurretPositionControl;
@@ -36,7 +36,7 @@ public class RobotContainer {
 
   private final CommandXboxController primaryController = new CommandXboxController(0);
   {
-    new RumbleState(primaryController);
+    new RumbleManager(primaryController);
   }
 
   private final ArcadeDrive drive = drivetrain.new ArcadeDrive(primaryController);

@@ -18,40 +18,46 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 public class HIDRumble extends SubsystemBase {
     private static final double kDefaultRequestDuration = 0.1;
     private static final int kDefaultRequestPriority = 0;
-    private static final HashMap<GenericHID, RumbleState> rumbleStateMap = new HashMap<>();
-
+    private static final HashMap<GenericHID, RumbleManager> rumbleManagerMap = new HashMap<>();
+    private static boolean rumbleEnabled = true;
 
     @SuppressWarnings("unused")
     private static HIDRumble instance = new HIDRumble();
 
-    private HIDRumble() {}
-
-    public static RumbleState getHIDState(GenericHID hid) {
-        return rumbleStateMap.get(hid);
+    private HIDRumble() {
     }
 
-    public static RumbleState getHIDState(CommandGenericHID commandHid) {
-        return getHIDState(commandHid.getHID());
+    public static RumbleManager getRumbleManager(GenericHID hid) {
+        return rumbleManagerMap.get(hid);
+    }
+
+    public static RumbleManager getRumbleManager(CommandGenericHID commandHid) {
+        return getRumbleManager(commandHid.getHID());
+    }
+
+    public static void enableRumble(boolean enabled) {
+        rumbleEnabled = enabled;
     }
 
     @Override
     public void periodic() {
-        for (Map.Entry<GenericHID, RumbleState> rumbleStatePair : rumbleStateMap.entrySet()) {
-            rumbleStatePair.getValue().update();
+        for (Map.Entry<GenericHID, RumbleManager> rumbleManagerEntry : rumbleManagerMap.entrySet()) {
+            RumbleManager rumbleManager = rumbleManagerEntry.getValue();
+            rumbleManager.update();
         }
     }
 
-    public static class RumbleState {
+    public static class RumbleManager {
         private final GenericHID hid;
         private ArrayList<RumbleRequest> rumbleRequestList = new ArrayList<>();
         private int highestPriorityRequestIndex = 0;
 
-        public RumbleState(GenericHID hid) {
+        public RumbleManager(GenericHID hid) {
             this.hid = hid;
-            HIDRumble.rumbleStateMap.put(hid, this);
+            HIDRumble.rumbleManagerMap.put(hid, this);
         }
 
-        public RumbleState(CommandGenericHID hid) {
+        public RumbleManager(CommandGenericHID hid) {
             this(hid.getHID());
         }
 
@@ -63,7 +69,6 @@ public class HIDRumble extends SubsystemBase {
         }
 
         public void update() {
-            
             Iterator<RumbleRequest> removeIterator = rumbleRequestList.iterator();
             boolean removedHighestPriorityRequest = false;
             while (removeIterator.hasNext()) {
@@ -78,14 +83,19 @@ public class HIDRumble extends SubsystemBase {
             if (removedHighestPriorityRequest) {
                 updateHighestPriorityRequestIndex();
             }
-            
+
+            // maintain logic to prevent memory leaks but don't update controller
+            if (HIDRumble.rumbleEnabled == false) {
+                return;
+            }
+
             double leftStrength = 0, rightStrength = 0;
 
             if (rumbleRequestList.size() > 0) {
                 RumbleRequest latestRumbleRequest = getLatestHighestPriorityRequest();
                 RumbleType rumbleType = latestRumbleRequest.getRumbleType();
                 double strength = latestRumbleRequest.getStrength();
-                
+
                 switch (rumbleType) {
                     case kLeftRumble:
                         leftStrength = strength;
@@ -102,6 +112,7 @@ public class HIDRumble extends SubsystemBase {
 
             hid.setRumble(RumbleType.kLeftRumble, leftStrength);
             hid.setRumble(RumbleType.kRightRumble, rightStrength);
+
         }
 
         private void updateHighestPriorityRequestIndex() {
@@ -153,12 +164,20 @@ public class HIDRumble extends SubsystemBase {
             this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, priority);
         }
 
-        public boolean isExpired() { return Timer.getFPGATimestamp() - start > lifespan; }
+        public boolean isExpired() {
+            return Timer.getFPGATimestamp() - start > lifespan;
+        }
 
-        public RumbleType getRumbleType() { return rumbleType; }
+        public RumbleType getRumbleType() {
+            return rumbleType;
+        }
 
-        public double getStrength() { return strength; }
+        public double getStrength() {
+            return strength;
+        }
 
-        public int getPriority() { return priority; }
+        public int getPriority() {
+            return priority;
+        }
     }
 }

@@ -112,7 +112,7 @@ public class Drivetrain extends SubsystemBase {
                 double rumbleAlpha = 1 - Math.abs(rotationAlpha);
                 double rumbleStrength = (rumbleAlpha == 1) ? RumbleConstants.kArcadeDriveRotateValue
                         : rumbleAlpha * RumbleConstants.kArcadeDriveIntermediateRotateValue;
-                HIDRumble.getHIDState(controller)
+                HIDRumble.getRumbleManager(controller)
                         .request(new RumbleRequest(RumbleType.kRightRumble, rumbleStrength, 1));
 
                 // get directions

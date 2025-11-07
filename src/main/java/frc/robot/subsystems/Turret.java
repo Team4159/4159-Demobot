@@ -90,7 +90,7 @@ public class Turret extends SubsystemBase {
                 // new setpoint
                 if (positionRadians > Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit)
                         && positionRadians < Units.rotationsToRadians(TurretConstants.kTurretForwardLimit)) {
-                    HIDRumble.getHIDState(controller).request(
+                    HIDRumble.getRumbleManager(controller).request(
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
                 }
 
