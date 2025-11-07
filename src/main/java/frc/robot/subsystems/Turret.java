@@ -8,12 +8,16 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.TurretConstants.TurretState;
+import frc.robot.lib.HIDRumble;
+import frc.robot.lib.HIDRumble.RumbleRequest;
 
 public class Turret extends SubsystemBase {
     private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
@@ -73,13 +77,22 @@ public class Turret extends SubsystemBase {
                 double angle = Math.atan2(inputY, inputX);
                 // also normalizes angle while converting
                 // note:negative 90 degrees is up
-                double angleFromVertical = ((angle + Units.degreesToRadians(90 + 180)) % Units.degreesToRadians(360))
-                        - Units.degreesToRadians(180);
+                double angleFromVertical = TurretConstants.kInputScalar
+                        * (((angle + Units.degreesToRadians(90 + 180)) % Units.degreesToRadians(360))
+                                - Units.degreesToRadians(180));
 
                 // get turret position in radians
                 double positionRadians = MathUtil.clamp(angleFromVertical,
                         Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit),
                         Units.rotationsToRadians(TurretConstants.kTurretForwardLimit));
+
+                // rumble if input is within range to let driver know the turret turning to a
+                // new setpoint
+                if (positionRadians > Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit)
+                        && positionRadians < Units.rotationsToRadians(TurretConstants.kTurretForwardLimit)) {
+                    HIDRumble.getHIDState(controller).request(
+                            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
+                }
 
                 // convert turret position to rotations
                 setpoint = Units.radiansToRotations(positionRadians);

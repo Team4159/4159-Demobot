@@ -43,7 +43,9 @@ public final class Constants {
 
   public static class TurretConstants {
     public static final int kTurretSparkId = 4;
+
     public static final double kInputDeadzone = 0.5;
+    public static final double kInputScalar = 0.5;
 
     public static final double kTurretForwardLimit = Units.degreesToRotations(30);
     public static final double kTurretReverseLimit = Units.degreesToRotations(30);
@@ -69,5 +71,11 @@ public final class Constants {
         motorSpeed = speed;
       }
     }
+  }
+
+  public static class RumbleConstants {
+    public static final double kArcadeDriveIntermediateRotateValue = 0.1;
+    public static final double kArcadeDriveRotateValue = 0.2;
+    public static final double kTurretTurnFeedbackValue = 0.2;
   }
 }

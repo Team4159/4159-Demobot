@@ -7,11 +7,13 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.lib.HIDRumble.RumbleState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Turret.TurretPositionControl;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Turret;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,6 +35,9 @@ public class RobotContainer {
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   private final CommandXboxController primaryController = new CommandXboxController(0);
+  {
+    new RumbleState(primaryController);
+  }
 
   private final ArcadeDrive drive = drivetrain.new ArcadeDrive(primaryController);
   private final TurretPositionControl turnTurret = turret.new TurretPositionControl(primaryController);

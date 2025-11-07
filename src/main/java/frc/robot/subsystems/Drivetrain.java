@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -12,6 +13,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import frc.robot.Constants;
 import frc.robot.Constants.ArcadeDriveConstants;
+import frc.robot.Constants.RumbleConstants;
+import frc.robot.lib.HIDRumble.RumbleRequest;
+import frc.robot.lib.HIDRumble;
 
 public class Drivetrain extends SubsystemBase {
     private TalonFX leftMotor1, leftMotor2;
@@ -80,10 +84,11 @@ public class Drivetrain extends SubsystemBase {
             double forwardDirection = Math.signum(inputY);
             double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
             double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.kInputDeadzone, 1);
-            
+
             // absolute angles
             double absoluteAngleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
-            double absoluteAngleFromVertical = Math.abs(Units.degreesToRadians(90) - Math.abs(absoluteAngleFromHorizontal));
+            double absoluteAngleFromVertical = Math
+                    .abs(Units.degreesToRadians(90) - Math.abs(absoluteAngleFromHorizontal));
 
             double leftDirection = 0, rightDirection = 0;
             if (rawMagnitude < ArcadeDriveConstants.kInputDeadzone) {
@@ -100,8 +105,15 @@ public class Drivetrain extends SubsystemBase {
                     double analogRange = Units.degreesToRadians(90) - (ArcadeDriveConstants.kRotationBufferAngle
                             + ArcadeDriveConstants.kTranslationBufferAngle);
                     double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
-                    rotationAlpha = forwardDirection * (relativeAngle / analogRange); // rotationAlpha range: [-1, 1]
+                    rotationAlpha = MathUtil.clamp(forwardDirection * (relativeAngle / analogRange), -1, 1);
                 }
+
+                // rumble for rotation
+                double rumbleAlpha = 1 - Math.abs(rotationAlpha);
+                double rumbleStrength = (rumbleAlpha == 1) ? RumbleConstants.kArcadeDriveRotateValue
+                        : rumbleAlpha * RumbleConstants.kArcadeDriveIntermediateRotateValue;
+                HIDRumble.getHIDState(controller)
+                        .request(new RumbleRequest(RumbleType.kRightRumble, rumbleStrength, 1));
 
                 // get directions
                 // 90 to 0 degrees: lerp from (-1, -1) to (-1, 1)
