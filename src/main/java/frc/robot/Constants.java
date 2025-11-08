@@ -58,9 +58,8 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-      10, 5, 0,
-      new TrapezoidProfile.Constraints(80, 40)
-    );
+        10, 5, 0,
+        new TrapezoidProfile.Constraints(80, 40));
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
