@@ -7,6 +7,7 @@ import java.util.Map;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -23,6 +24,8 @@ public class HIDRumble {
 
     private static final double kDefaultRequestDuration = 0.1;
     private static final int kDefaultRequestPriority = 0;
+    private static final boolean kRumblePersistWhileDisabled = false;
+
     private static final HashMap<GenericHID, RumbleManager> rumbleManagerMap = new HashMap<>();
 
     @SuppressWarnings("unused")
@@ -30,9 +33,9 @@ public class HIDRumble {
 
     // shuffleboard
     private static final GenericEntry rumbleEnabledEntry = Shuffleboard.getTab("Drive")
-          .add("Controller Rumble", true)
-          .withWidget("Toggle Switch")
-          .getEntry();
+            .add("Controller Rumble", true)
+            .withWidget("Toggle Switch")
+            .getEntry();
 
     private HIDRumble() {
     }
@@ -90,46 +93,55 @@ public class HIDRumble {
         }
 
         public void update() {
-            Iterator<RumbleRequest> removeIterator = rumbleRequestList.iterator();
-            boolean removedHighestPriorityRequest = false;
-            while (removeIterator.hasNext()) {
-                RumbleRequest rumbleRequest = removeIterator.next();
-                if (rumbleRequest.isExpired()) {
-                    removeIterator.remove();
-                    if (rumbleRequest.getPriority() == highestPriorityRequestIndex) {
-                        removedHighestPriorityRequest = true;
+            boolean robotEnabled = DriverStation.isEnabled();
+            boolean rumbleEnabled = rumbleEnabledEntry.getBoolean(true);
+
+            if (!robotEnabled && !kRumblePersistWhileDisabled) {
+                rumbleRequestList.clear();
+                highestPriorityRequestIndex = 0;
+            } else {
+                Iterator<RumbleRequest> removeIterator = rumbleRequestList.iterator();
+                boolean removedHighestPriorityRequest = false;
+                while (removeIterator.hasNext()) {
+                    RumbleRequest rumbleRequest = removeIterator.next();
+                    if (rumbleRequest.isExpired()) {
+                        removeIterator.remove();
+                        if (rumbleRequest.getPriority() == highestPriorityRequestIndex) {
+                            removedHighestPriorityRequest = true;
+                        }
                     }
                 }
-            }
-            if (removedHighestPriorityRequest) {
-                updateHighestPriorityRequestIndex();
-            }
-
-            double leftStrength = 0, rightStrength = 0;
-
-            boolean rumbleEnabled = rumbleEnabledEntry.getBoolean(true);
-            if (rumbleEnabled && rumbleRequestList.size() > 0) {
-                RumbleRequest latestRumbleRequest = getLatestHighestPriorityRequest();
-                RumbleType rumbleType = latestRumbleRequest.getRumbleType();
-                double strength = latestRumbleRequest.getStrength();
-
-                switch (rumbleType) {
-                    case kLeftRumble:
-                        leftStrength = strength;
-                        break;
-                    case kRightRumble:
-                        rightStrength = strength;
-                        break;
-                    case kBothRumble:
-                        leftStrength = strength;
-                        rightStrength = strength;
-                        break;
+                if (removedHighestPriorityRequest) {
+                    updateHighestPriorityRequestIndex();
                 }
             }
 
+            if (rumbleEnabled && rumbleRequestList.size() > 0) {
+                setRumbleFromRequest(getLatestHighestPriorityRequest());
+            } else {
+                hid.setRumble(RumbleType.kBothRumble, 0);
+            }
+        }
+
+        private void setRumbleFromRequest(RumbleRequest rumbleRequest) {
+            RumbleType rumbleType = rumbleRequest.getRumbleType();
+            double strength = rumbleRequest.getStrength();
+
+            double leftStrength = 0, rightStrength = 0;
+            switch (rumbleType) {
+                case kLeftRumble:
+                    leftStrength = strength;
+                    break;
+                case kRightRumble:
+                    rightStrength = strength;
+                    break;
+                case kBothRumble:
+                    leftStrength = strength;
+                    rightStrength = strength;
+                    break;
+            }
             hid.setRumble(RumbleType.kLeftRumble, leftStrength);
             hid.setRumble(RumbleType.kRightRumble, rightStrength);
-
         }
 
         private void updateHighestPriorityRequestIndex() {
