@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
@@ -20,7 +21,7 @@ public class HIDRumble {
     @SuppressWarnings("unused")
     private static final HIDRumble instance = new HIDRumble();
 
-    private static final double kDefaultRequestDuration = 0.1;
+    private static final double kDefaultRequestDuration = Units.millisecondsToSeconds(50);
     private static final int kDefaultRequestPriority = 0;
     private static final boolean kRumblePersistWhileDisabled = false;
 
