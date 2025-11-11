@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.lib.HIDRumble;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Turret.TurretPositionControl;
@@ -42,7 +41,6 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // Configure the trigger bindings
-    initializeLibraries();
     configureBindings();
     drivetrain.setDefaultCommand(drive);
     turret.setDefaultCommand(turnTurret);
@@ -64,11 +62,6 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-  }
-
-  // i dont like this solution but it works i guess
-  private void initializeLibraries() {
-    HIDRumble.initialize();
   }
 
   /**

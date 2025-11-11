@@ -6,11 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -31,18 +29,10 @@ public class HIDRumble {
     @SuppressWarnings("unused")
     private static final RumbleLooper rumbleLooper = new RumbleLooper();
 
-    // shuffleboard
-    private static final GenericEntry rumbleEnabledEntry = Shuffleboard.getTab("Drive")
-            .add("Controller Rumble", true)
-            .withWidget("Toggle Switch")
-            .getEntry();
+    private static boolean rumbleEnabled = true;
 
     private HIDRumble() {
     }
-
-    public static void initialize() {
-        // initializes member variables
-    };
 
     public static void rumble(GenericHID hid, RumbleRequest rumbleRequest) {
         RumbleManager existingRumbleManager = rumbleManagerMap.get(hid);
@@ -54,8 +44,8 @@ public class HIDRumble {
         rumble(commandHid.getHID(), rumbleRequest);
     }
 
-    public static void enableRumble(boolean enabled) {
-        rumbleEnabledEntry.setBoolean(enabled);
+    public static void enable(boolean enabled) {
+        rumbleEnabled = enabled;
     }
 
     private static class RumbleLooper extends SubsystemBase {
@@ -94,7 +84,6 @@ public class HIDRumble {
 
         public void update() {
             boolean robotEnabled = DriverStation.isEnabled();
-            boolean rumbleEnabled = rumbleEnabledEntry.getBoolean(true);
 
             if (!robotEnabled && !kRumblePersistWhileDisabled) {
                 rumbleRequestList.clear();

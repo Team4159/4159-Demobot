@@ -49,12 +49,11 @@ public class Drivetrain extends SubsystemBase {
         rightMotor2.stopMotor();
     }
 
-    public class Drive extends Command {
+    public class TankDrive extends Command {
         private CommandXboxController controller;
 
-        public Drive(CommandXboxController controller) {
+        public TankDrive(CommandXboxController controller) {
             this.controller = controller;
-
             addRequirements(Drivetrain.this);
         }
 
@@ -137,6 +136,11 @@ public class Drivetrain extends SubsystemBase {
             rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
 
             Drivetrain.this.drive(leftSpeed, rightSpeed);
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            Drivetrain.this.stop();
         }
     }
 }
