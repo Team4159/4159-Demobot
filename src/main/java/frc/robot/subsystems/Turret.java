@@ -56,6 +56,7 @@ public class Turret extends SubsystemBase {
     public class TurretPositionControl extends Command {
         private final CommandXboxController controller;
         private double setpoint = 0;
+        private double previousSetpoint = setpoint;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
@@ -65,6 +66,7 @@ public class Turret extends SubsystemBase {
         @Override
         public void initialize() {
             setpoint = 0;
+            previousSetpoint = setpoint;
         }
 
         @Override
@@ -86,15 +88,20 @@ public class Turret extends SubsystemBase {
                         Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit),
                         Units.rotationsToRadians(TurretConstants.kTurretForwardLimit));
 
+                // convert turret position to rotations
+                previousSetpoint = setpoint;
+                setpoint = Units.radiansToRotations(positionRadians);
+
                 // rumble if input is within range to let driver know the turret turning to a
                 // new setpoint
-                if (positionRadians > Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit)
-                        && positionRadians < Units.rotationsToRadians(TurretConstants.kTurretForwardLimit)) {
+                boolean setpointWithinRange = previousSetpoint > -TurretConstants.kTurretReverseLimit
+                && previousSetpoint < TurretConstants.kTurretForwardLimit;
+                boolean setpointChanged = (setpoint != previousSetpoint);
+                if (setpointWithinRange) {
                     HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
+                } else if (setpointChanged) {
+                    HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0, 0.2));
                 }
-
-                // convert turret position to rotations
-                setpoint = Units.radiansToRotations(positionRadians);
             }
 
             double voltage = TurretConstants.kTurretProfiledPIDController

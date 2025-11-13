@@ -157,28 +157,28 @@ public class HIDRumble {
         private final RumbleType rumbleType;
         private final int priority;
 
-        public RumbleRequest(RumbleType rumbleType, double strength, double lifespan, int priority) {
+        public RumbleRequest(RumbleType rumbleType, double strength, int priority, double lifespan) {
             this.start = Timer.getFPGATimestamp();
             this.rumbleType = rumbleType;
             this.strength = MathUtil.clamp(strength, 0, 1);
-            this.lifespan = Math.max(0, lifespan);
             this.priority = priority;
+            this.lifespan = Math.max(0, lifespan);
         }
 
         public RumbleRequest(RumbleType rumbleType, double strength) {
-            this(rumbleType, strength, kDefaultRequestDuration, kDefaultRequestPriority);
+            this(rumbleType, strength, kDefaultRequestPriority, kDefaultRequestDuration);
         }
 
         public RumbleRequest(double strength) {
-            this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, kDefaultRequestPriority);
+            this(RumbleType.kBothRumble, strength, kDefaultRequestPriority, kDefaultRequestDuration);
         }
 
         public RumbleRequest(RumbleType rumbleType, double strength, int priority) {
-            this(rumbleType, strength, kDefaultRequestDuration, priority);
+            this(rumbleType, strength, priority, kDefaultRequestDuration);
         }
 
         public RumbleRequest(double strength, int priority) {
-            this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, priority);
+            this(RumbleType.kBothRumble, strength, priority, kDefaultRequestDuration);
         }
 
         public boolean isExpired() {
