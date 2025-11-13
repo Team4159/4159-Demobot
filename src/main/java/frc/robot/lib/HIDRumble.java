@@ -18,19 +18,17 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
  * rudimentary library for rumble feedback on controllers and HIDs
  */
 public class HIDRumble {
-    @SuppressWarnings("unused")
-    private static final HIDRumble instance = new HIDRumble();
-
     private static final double kDefaultRequestDuration = Units.millisecondsToSeconds(50);
     private static final int kDefaultRequestPriority = 0;
     private static final boolean kRumblePersistWhileDisabled = false;
 
+    private static boolean rumbleEnabled = true;
+
     private static final HashMap<GenericHID, RumbleManager> rumbleManagerMap = new HashMap<>();
 
-    @SuppressWarnings("unused")
-    private static final RumbleLooper rumbleLooper = new RumbleLooper();
-
-    private static boolean rumbleEnabled = true;
+    static {
+        new RumbleLooper();
+    };
 
     private HIDRumble() {
     }
