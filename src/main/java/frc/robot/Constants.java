@@ -35,10 +35,10 @@ public final class Constants {
   }
 
   public static class DrivetrainConstants {
-    public static final int leftMotor1ID = 0;
-    public static final int leftMotor2ID = 1;
-    public static final int rightMotor1ID = 2;
-    public static final int rightMotor2ID = 3;
+    public static final int leftMotor1ID = 2;
+    public static final int leftMotor2ID = 3;
+    public static final int rightMotor1ID = 4;
+    public static final int rightMotor2ID = 1;
   }
 
   public static class TurretConstants {
