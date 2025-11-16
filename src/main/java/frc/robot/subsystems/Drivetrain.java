@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import frc.robot.Constants;
 import frc.robot.Constants.ArcadeDriveConstants;
+import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.RumbleConstants;
 import frc.robot.lib.HIDRumble.RumbleRequest;
 import frc.robot.lib.HIDRumble;
@@ -40,6 +41,8 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
+        leftSpeed *= DrivetrainConstants.kInputScalar;
+        rightSpeed *= DrivetrainConstants.kInputScalar;
         leftMotor1.set(leftSpeed);
         leftMotor2.set(leftSpeed);
         rightMotor1.set(rightSpeed);
