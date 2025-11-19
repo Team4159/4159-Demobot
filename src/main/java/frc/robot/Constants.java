@@ -49,11 +49,10 @@ public final class Constants {
     public static final double kInputDeadzone = 0.5;
     public static final double kInputScalar = 0.5;
 
-    public static final double kTurretMotorGearRatio = 7 * 7;
-    public static final double kTurretPivotGearRatio = 130; // approximation
+    public static final double kTurretMotorGearRatio = 49; // approximated because we don't want to count teeth
 
-    public static final double kTurretForwardLimit = Units.degreesToRotations(30) * kTurretMotorGearRatio * kTurretPivotGearRatio;
-    public static final double kTurretReverseLimit = Units.degreesToRotations(30) * kTurretMotorGearRatio * kTurretPivotGearRatio;
+    public static final double kTurretForwardLimit = Units.degreesToRotations(30) * kTurretMotorGearRatio;
+    public static final double kTurretReverseLimit = Units.degreesToRotations(30) * kTurretMotorGearRatio;
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
       kTurretMotorConfig.idleMode(IdleMode.kBrake);
