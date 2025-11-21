@@ -30,12 +30,12 @@ public class Drivetrain extends SubsystemBase {
         rightMotor2 = new TalonFX(Constants.DrivetrainConstants.rightMotor2ID);
 
         leftMotorConfig = new MotorOutputConfigs();
-        leftMotorConfig.Inverted = InvertedValue.CounterClockwise_Positive;
+        leftMotorConfig.Inverted = InvertedValue.Clockwise_Positive;
         leftMotor1.getConfigurator().apply(leftMotorConfig);
         leftMotor2.getConfigurator().apply(leftMotorConfig);
 
         rightMotorConfig = new MotorOutputConfigs();
-        rightMotorConfig.Inverted = InvertedValue.Clockwise_Positive;
+        rightMotorConfig.Inverted = InvertedValue.CounterClockwise_Positive;
         rightMotor1.getConfigurator().apply(rightMotorConfig);
         rightMotor2.getConfigurator().apply(rightMotorConfig);
     }
