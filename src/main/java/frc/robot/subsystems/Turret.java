@@ -67,6 +67,7 @@ public class Turret extends SubsystemBase {
         public void initialize() {
             setpoint = 0;
             previousSetpoint = setpoint;
+            TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
         }
 
         @Override
@@ -95,18 +96,24 @@ public class Turret extends SubsystemBase {
                 // rumble if input is within range to let driver know the turret turning to a
                 // new setpoint
                 boolean setpointWithinRange = previousSetpoint > -TurretConstants.kTurretReverseLimit
-                && previousSetpoint < TurretConstants.kTurretForwardLimit;
+                        && previousSetpoint < TurretConstants.kTurretForwardLimit;
                 boolean setpointChanged = (setpoint != previousSetpoint);
                 if (setpointWithinRange) {
-                    HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
+                    HIDRumble.rumble(controller,
+                            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
                 } else if (setpointChanged) {
-                    HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0, 0.2));
+                    HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kLeftRumble,
+                            RumbleConstants.kTurretTurnFeedbackValue, 0, 0.2));
                 }
             }
 
-            double voltage = TurretConstants.kTurretProfiledPIDController
-                    .calculate(turretMotor.getEncoder().getPosition(), setpoint);
-            turretMotor.setVoltage(voltage);
+            double correctedSetpoint = setpoint * TurretConstants.kTurretMotorGearRatio;
+            double pidVoltage = TurretConstants.kTurretProfiledPIDController
+                    .calculate(turretMotor.getEncoder().getPosition(), correctedSetpoint);
+            double feedforwardVoltage = TurretConstants.kTurretFeedForward.calculateWithVelocities(
+                    turretMotor.getEncoder().getVelocity(),
+                    TurretConstants.kTurretFeedForwardSpeed * Math.signum(setpoint - previousSetpoint));
+            turretMotor.setVoltage(pidVoltage + feedforwardVoltage);
         }
     }
 }

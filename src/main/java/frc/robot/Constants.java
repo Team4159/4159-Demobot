@@ -8,6 +8,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
@@ -62,8 +63,10 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        10, 5, 0,
-        new TrapezoidProfile.Constraints(80, 40));
+        0.5, 0, 0,
+        new TrapezoidProfile.Constraints(250, 500));
+    public static final SimpleMotorFeedforward kTurretFeedForward = new SimpleMotorFeedforward(0, 0, 0);
+    public static final double kTurretFeedForwardSpeed = 0.1;
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
