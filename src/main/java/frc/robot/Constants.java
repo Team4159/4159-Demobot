@@ -66,7 +66,6 @@ public final class Constants {
         0.5, 0, 0,
         new TrapezoidProfile.Constraints(250, 500));
     public static final SimpleMotorFeedforward kTurretFeedForward = new SimpleMotorFeedforward(0, 0, 0);
-    public static final double kTurretFeedForwardSpeed = 0.1;
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);

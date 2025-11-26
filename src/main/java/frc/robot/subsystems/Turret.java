@@ -110,9 +110,8 @@ public class Turret extends SubsystemBase {
             double correctedSetpoint = setpoint * TurretConstants.kTurretMotorGearRatio;
             double pidVoltage = TurretConstants.kTurretProfiledPIDController
                     .calculate(turretMotor.getEncoder().getPosition(), correctedSetpoint);
-            double feedforwardVoltage = TurretConstants.kTurretFeedForward.calculateWithVelocities(
-                    turretMotor.getEncoder().getVelocity(),
-                    TurretConstants.kTurretFeedForwardSpeed * Math.signum(setpoint - previousSetpoint));
+            double feedforwardVoltage = TurretConstants.kTurretFeedForward
+                    .calculate(TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity);
             turretMotor.setVoltage(pidVoltage + feedforwardVoltage);
         }
     }
