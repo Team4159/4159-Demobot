@@ -5,13 +5,13 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Turret.TurretPositionControl;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -26,15 +26,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Drivetrain drivetrain = new Drivetrain();
   private final Turret turret = new Turret();
 
-  private final CommandXboxController primaryController = new CommandXboxController(
+  private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
 
-  private final ArcadeDrive drive = drivetrain.new ArcadeDrive(primaryController);
-  private final TurretPositionControl turnTurret = turret.new TurretPositionControl(primaryController);
+  private final ArcadeDrive drive = drivetrain.new ArcadeDrive(driverController);
+  private final TurretPositionControl turnTurret = turret.new TurretPositionControl(driverController);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -71,6 +70,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return Commands.runOnce(() -> {});
   }
 }
