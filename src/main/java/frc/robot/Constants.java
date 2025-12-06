@@ -36,10 +36,10 @@ public final class Constants {
   }
 
   public static class DrivetrainConstants {
-    public static final int leftMotor1ID = 2;
-    public static final int leftMotor2ID = 3;
-    public static final int rightMotor1ID = 4;
-    public static final int rightMotor2ID = 1;
+    public static final int kLeftMotor1Id = 2;
+    public static final int kLeftMotor2Id = 3;
+    public static final int kRightMotor1Id = 4;
+    public static final int kRightMotor2Id = 1;
 
     public static final double kInputScalar = 0.2;
   }

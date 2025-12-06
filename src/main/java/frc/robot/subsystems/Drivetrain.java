@@ -19,25 +19,24 @@ import frc.robot.lib.HIDRumble.RumbleRequest;
 import frc.robot.lib.HIDRumble;
 
 public class Drivetrain extends SubsystemBase {
-    private final TalonFX leftMotor1, leftMotor2;
-    private final TalonFX rightMotor1, rightMotor2;
-    private final MotorOutputConfigs leftMotorConfig, rightMotorConfig;
-
-    public Drivetrain() {
-        leftMotor1 = new TalonFX(Constants.DrivetrainConstants.leftMotor1ID);
-        leftMotor2 = new TalonFX(Constants.DrivetrainConstants.leftMotor2ID);
-        rightMotor1 = new TalonFX(Constants.DrivetrainConstants.rightMotor1ID);
-        rightMotor2 = new TalonFX(Constants.DrivetrainConstants.rightMotor2ID);
-
-        leftMotorConfig = new MotorOutputConfigs();
+    private final TalonFX leftMotor1 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor1Id);
+    private final TalonFX leftMotor2 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor2Id);
+    private final TalonFX rightMotor1 = new TalonFX(Constants.DrivetrainConstants.kRightMotor1Id);
+    private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.kRightMotor2Id);
+    {
+        var leftMotorConfig = new MotorOutputConfigs();
         leftMotorConfig.Inverted = InvertedValue.Clockwise_Positive;
         leftMotor1.getConfigurator().apply(leftMotorConfig);
         leftMotor2.getConfigurator().apply(leftMotorConfig);
 
-        rightMotorConfig = new MotorOutputConfigs();
+        var rightMotorConfig = new MotorOutputConfigs();
         rightMotorConfig.Inverted = InvertedValue.CounterClockwise_Positive;
         rightMotor1.getConfigurator().apply(rightMotorConfig);
         rightMotor2.getConfigurator().apply(rightMotorConfig);
+    }
+
+    public Drivetrain() {
+
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
