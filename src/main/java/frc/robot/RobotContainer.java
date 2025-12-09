@@ -5,10 +5,15 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.TurretConstants.TurretState;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Drivetrain.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Shooter.ChangeHood;
+import frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -23,20 +28,28 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Drivetrain drivetrain = new Drivetrain();
+  private final Turret turret = new Turret();
   private final Shooter shooter = new Shooter();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-// joysticks
-private final CommandJoystick leftStick = new CommandJoystick(0);
-private final CommandJoystick rightStick = new CommandJoystick(1);
+  private final CommandJoystick leftStick = new CommandJoystick(0);
+  private final CommandJoystick rightStick = new CommandJoystick(1);
+  private final CommandJoystick secondaryStick = new CommandJoystick(2);
+
+  private final Drive drive = drivetrain.new Drive(drivetrain, leftStick, rightStick);
+  // is it left stick or right stick for the change hood/pitch adjustment ? 
+  private final ChangeHood changeHood = shooter.new ChangeHood(leftStick, shooter);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    drivetrain.setDefaultCommand(drive);
+    shooter.setDefaultCommand(changeHood);
   }
 
   /**
@@ -56,9 +69,11 @@ private final CommandJoystick rightStick = new CommandJoystick(1);
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    // add the secondary joystick button for hood
-    leftStick.button(Constants.ShooterConstants.hoodAdjusterControllerPort).whileTrue(shooter.new ChangeHood(leftStick));
 
+    secondaryStick.button(Constants.TurretConstants.kClockwisePort)
+        .whileTrue(turret.new TurnTurret(TurretState.CLOCKWISE));
+    secondaryStick.button(Constants.TurretConstants.kCounterClockwisePort)
+        .whileTrue(turret.new TurnTurret(TurretState.COUNTERCLOCKWISE));
   }
 
   /**
