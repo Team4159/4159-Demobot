@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -19,7 +18,29 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  // enum for shooter
+  public static class DrivetrainConstants {
+    public static final int leftMotor1ID = 0;
+    public static final int leftMotor2ID = 1;
+    public static final int rightMotor1ID = 2;
+    public static final int rightMotor2ID = 3;
+  }
+
+  public static class TurretConstants {
+    public static final int kTurretSparkId = 4;
+    public static final int kClockwisePort = 3;
+    public static final int kCounterClockwisePort = 4;
+    
+    public static enum TurretState {
+      CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), OFF(0);
+      
+      public double motorSpeed;
+
+      private TurretState(double speed) {
+        motorSpeed = speed;
+      }
+    }
+  }
+  
   public static class ShooterConstants {
     //IDs for all motors
     public static final int leftShooterControllerPort = 5;
@@ -44,5 +65,25 @@ public final class Constants {
     public static final double minPitch = Units.degreesToRadians(14);
     public static final double maxPitch = Units.rotationsToRadians(0.2);
 
+    // ENUMS 
+    public static enum SpinState {
+      OFF(0), SHOOT(1), REVERSE(-1);
+
+      public double motorSpeed;
+
+      private SpinState(double speed) {
+        motorSpeed = speed;
+      }
+
+      public double getSpeed() {
+        return motorSpeed;
+      }
+    }
   }
 }
+
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+
