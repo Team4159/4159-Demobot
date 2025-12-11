@@ -44,6 +44,18 @@ public final class Constants {
     public static final double kInputScalar = 0.2;
   }
 
+  public static class FeederConstants {
+    public static enum FeederState {
+      IDLE(0), INTAKE(1), OUTTAKE(-1);
+
+      public double speed;
+      
+      private FeederState(double speed) {
+        this.speed = speed;
+      }
+    }
+  }
+
   public static class TurretConstants {
     public static final int kTurretSparkId = 9;
 

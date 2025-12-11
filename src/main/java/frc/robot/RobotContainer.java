@@ -5,8 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.FeederConstants.FeederState;
+import frc.robot.lib.FluentTrigger;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
+import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Turret.TurretPositionControl;
 import frc.robot.subsystems.Turret;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain drivetrain = new Drivetrain();
+  private final Feeder feeder = new Feeder();
   private final Turret turret = new Turret();
 
   private final CommandXboxController driverController = new CommandXboxController(
@@ -59,7 +63,10 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-
+    new FluentTrigger()
+      .setDefault(feeder.new SetState(FeederState.IDLE))
+      .bind(driverController.leftTrigger(), feeder.new SetState(FeederState.INTAKE))
+      .bind(driverController.a(), feeder.new SetState(FeederState.OUTTAKE));
   }
 
   /**
