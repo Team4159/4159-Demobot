@@ -15,7 +15,7 @@ public class Feeder extends SubsystemBase {
     private final SparkMax rightMotor = new SparkMax(1, MotorType.kBrushless);
     {
         var leftMotorConfig = new SparkMaxConfig();
-        leftMotorConfig.inverted(false);
+        leftMotorConfig.inverted(true);
         leftMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         var rightMotorConfig = new SparkMaxConfig();
