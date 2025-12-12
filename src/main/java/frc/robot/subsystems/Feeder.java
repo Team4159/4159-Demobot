@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeederConstants.FeederState;
 
 public class Feeder extends SubsystemBase {
-    private final SparkMax leftMotor = new SparkMax(0, MotorType.kBrushless);
-    private final SparkMax rightMotor = new SparkMax(1, MotorType.kBrushless);
+    private final SparkMax leftMotor = new SparkMax(1, MotorType.kBrushless);
+    private final SparkMax rightMotor = new SparkMax(2, MotorType.kBrushless);
     {
         var leftMotorConfig = new SparkMaxConfig();
         leftMotorConfig.inverted(true);
