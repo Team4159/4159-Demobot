@@ -46,7 +46,7 @@ public final class Constants {
 
   public static class FeederConstants {
     public static enum FeederState {
-      IDLE(0), INTAKE(1), OUTTAKE(-1);
+      IDLE(0), INTAKE(0.25), OUTTAKE(-25);
 
       public double speed;
       
