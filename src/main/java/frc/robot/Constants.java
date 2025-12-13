@@ -44,13 +44,25 @@ public final class Constants {
     public static final double kInputScalar = 0.2;
   }
 
+  public static class FeederConstants {
+    public static enum FeederState {
+      IDLE(0), INTAKE(0.25), OUTTAKE(-25);
+
+      public double speed;
+      
+      private FeederState(double speed) {
+        this.speed = speed;
+      }
+    }
+  }
+
   public static class TurretConstants {
     public static final int kTurretSparkId = 9;
 
     public static final double kInputDeadzone = 0.5;
     public static final double kInputScalar = 0.5;
 
-    public static final double kTurretMotorGearRatio = 49; // approximated because we don't want to count teeth
+    public static final double kTurretMotorGearRatio = 23 * 4; // approximated because we don't want to count teeth
 
     public static final double kTurretForwardLimit = Units.degreesToRotations(30) * kTurretMotorGearRatio;
     public static final double kTurretReverseLimit = Units.degreesToRotations(30) * kTurretMotorGearRatio;
