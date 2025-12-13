@@ -49,7 +49,7 @@ public final class Constants {
     public static final int kRightMotorId = 2;
 
     public static enum FeederState {
-      IDLE(0), INTAKE(0.25), OUTTAKE(-25);
+      IDLE(0), INTAKE(0.25), OUTTAKE(-0.25);
 
       public double speed;
       
