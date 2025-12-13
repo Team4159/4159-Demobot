@@ -45,6 +45,9 @@ public final class Constants {
   }
 
   public static class FeederConstants {
+    public static final int kLeftMotorId = 1;
+    public static final int kRightMotorId = 2;
+
     public static enum FeederState {
       IDLE(0), INTAKE(0.25), OUTTAKE(-25);
 
