@@ -25,11 +25,11 @@ public class Feeder extends SubsystemBase {
     }
 
     public Feeder() {
-
+        leftMotor.stopMotor();
     }
 
     public void setState(FeederState state) {
-        leftMotor.set(state.speed);
+        //leftMotor.set(state.speed);
         rightMotor.set(state.speed);
     }
 
