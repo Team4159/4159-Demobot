@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants;
 import frc.robot.Constants.ArcadeDriveConstants;
@@ -24,13 +25,15 @@ public class Drivetrain extends SubsystemBase {
     private final TalonFX rightMotor1 = new TalonFX(Constants.DrivetrainConstants.kRightMotor1Id);
     private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.kRightMotor2Id);
     {
-        var leftMotorConfig = new MotorOutputConfigs();
-        leftMotorConfig.Inverted = InvertedValue.Clockwise_Positive;
+        var leftMotorConfig = new MotorOutputConfigs()
+                .withInverted(InvertedValue.Clockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake);
         leftMotor1.getConfigurator().apply(leftMotorConfig);
         leftMotor2.getConfigurator().apply(leftMotorConfig);
 
-        var rightMotorConfig = new MotorOutputConfigs();
-        rightMotorConfig.Inverted = InvertedValue.CounterClockwise_Positive;
+        var rightMotorConfig = new MotorOutputConfigs()
+                .withInverted(InvertedValue.CounterClockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake);
         rightMotor1.getConfigurator().apply(rightMotorConfig);
         rightMotor2.getConfigurator().apply(rightMotorConfig);
     }
@@ -40,8 +43,8 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
-        leftSpeed *= DrivetrainConstants.kInputScalar;
-        rightSpeed *= DrivetrainConstants.kInputScalar;
+        leftSpeed *= DrivetrainConstants.kSpeedScalar;
+        rightSpeed *= DrivetrainConstants.kSpeedScalar;
         leftMotor1.set(leftSpeed);
         leftMotor2.set(leftSpeed);
         rightMotor1.set(rightSpeed);

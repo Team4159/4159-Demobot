@@ -41,7 +41,7 @@ public final class Constants {
     public static final int kRightMotor1Id = 4;
     public static final int kRightMotor2Id = 1;
 
-    public static final double kInputScalar = 0.2;
+    public static final double kSpeedScalar = 0.2;
   }
 
   public static class FeederConstants {
@@ -63,7 +63,7 @@ public final class Constants {
     public static final int kTurretSparkId = 9;
 
     public static final double kInputDeadzone = 0.5;
-    public static final double kInputScalar = 0.5;
+    public static final double kAngleScalar = 0.5;
 
     public static final double kTurretMotorGearRatio = 23 * 4; // approximated because we don't want to count teeth
 

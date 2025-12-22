@@ -78,10 +78,11 @@ public class Turret extends SubsystemBase {
 
             if (magnitude > TurretConstants.kInputDeadzone) {
                 double angle = Math.atan2(inputY, inputX);
-                // also normalizes angle while converting
-                // note:negative 90 degrees is up
-                double angleFromVertical = TurretConstants.kInputScalar
-                        * (((angle + Units.degreesToRadians(90 + 180)) % Units.degreesToRadians(360))
+                // normalizes angle while scaling
+                // note: negative 90 degrees is up
+                double angleFromVertical = TurretConstants.kAngleScalar
+                        * (((angle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
+                                % Units.degreesToRadians(360))
                                 - Units.degreesToRadians(180));
 
                 // get turret position in radians
