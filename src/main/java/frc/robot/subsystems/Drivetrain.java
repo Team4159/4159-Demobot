@@ -43,6 +43,8 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
+        leftSpeed = MathUtil.clamp(leftSpeed, -1, 1);
+        rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
         leftSpeed *= DrivetrainConstants.kSpeedScalar;
         rightSpeed *= DrivetrainConstants.kSpeedScalar;
         leftMotor1.set(leftSpeed);
