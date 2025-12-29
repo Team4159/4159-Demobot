@@ -152,7 +152,7 @@ public class HIDRumble {
         }
     }
 
-    public static class RumbleRequest implements Cloneable {
+    public static class RumbleRequest {
         private final double start, lifespan, strength;
         private final RumbleType rumbleType;
         private final int priority;
