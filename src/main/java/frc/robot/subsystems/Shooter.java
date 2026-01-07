@@ -54,7 +54,7 @@ public class Shooter extends SubsystemBase {
 
         public double throttleToAngle() {
             // convert throttle to angle
-            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed, ShooterConstants.hoodAngleMin, ShooterConstants.hoodAngleMax);
+            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * 0.02, ShooterConstants.hoodAngleMin, ShooterConstants.hoodAngleMax);
         }
 
         // execute command (over and over running) call set function to correspond
