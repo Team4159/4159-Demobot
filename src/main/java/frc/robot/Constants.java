@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import edu.wpi.first.math.util.Units;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -10,7 +11,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -89,6 +89,41 @@ public final class Constants {
 
       private TurretState(double speed) {
         motorSpeed = speed;
+      }
+    }
+  }
+
+  public static class ShooterConstants {
+    //IDs for all motors
+    public static final int leftShooterMotorId = 5;
+    public static final int rightShooterMotorId = 6;
+    public static final int hoodAdjusterMotorId = 7;
+
+    // hood angle ranges
+    public static final double hoodAngleMin = Units.degreesToRotations(0);
+    public static final double hoodAngleMax = Units.degreesToRotations(70);
+    public static final double hoodAngleOffset = Units.degreesToRadians(0);
+
+    //----- tolerances: so if the motors/whatnot are a bit off, it'll still work------
+    // pitch refers to the angle
+    public static final double pitchTolerance = Units.degreesToRotations(5);
+    // used the value for spinTolerance from FRC-2024 
+    public static final double spinTolerance = Math.PI/8;
+
+    // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
+    // efficient to have a range instead of set states
+    // REPLACE the values below with actual mins and maxes later (after testing).
+    public static final double minPitch = Units.degreesToRadians(14);
+    public static final double maxPitch = Units.rotationsToRadians(0.2);
+
+    // ENUMS 
+    public static enum ShooterState {
+      OFF(0), SHOOT(0.67), REVERSE(-0.67);
+
+      public double speed;
+
+      private ShooterState(double speed) {
+        this.speed = speed;
       }
     }
   }

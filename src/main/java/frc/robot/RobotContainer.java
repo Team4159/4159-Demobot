@@ -6,12 +6,14 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
+import frc.robot.Constants.ShooterConstants.ShooterState;
 import frc.robot.lib.FluentTrigger;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Turret.TurretPositionControl;
 import frc.robot.subsystems.Turret;
+import frc.robot.subsystems.Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,6 +33,7 @@ public class RobotContainer {
   private final Drivetrain drivetrain = new Drivetrain();
   private final Feeder feeder = new Feeder();
   private final Turret turret = new Turret();
+  private final Shooter shooter = new Shooter();
 
   private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
@@ -67,6 +70,13 @@ public class RobotContainer {
       .setDefault(feeder.new SetState(FeederState.IDLE))
       .bind(driverController.leftTrigger(), feeder.new SetState(FeederState.INTAKE))
       .bind(driverController.a(), feeder.new SetState(FeederState.OUTTAKE));
+    new FluentTrigger()
+      .bind(driverController.leftBumper(), shooter.new ChangeHood(0.01))
+      .bind(driverController.leftTrigger(), shooter.new ChangeHood(-0.01));
+    new FluentTrigger()
+      .setDefault(shooter.new ControlSpin(ShooterState.OFF))
+      .bind(driverController.leftTrigger(), shooter.new ControlSpin(ShooterState.SHOOT))
+      .bind(driverController.a(), shooter.new ControlSpin(ShooterState.REVERSE));
   }
 
   /**
