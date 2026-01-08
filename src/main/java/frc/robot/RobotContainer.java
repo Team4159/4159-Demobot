@@ -74,7 +74,7 @@ public class RobotContainer {
   private void configureBindings() {
     new FluentTrigger()
       .setDefault(feeder.new ChangeState(FeederState.IDLE))
-      .bind(shootTrigger, new Orchestrator().require(feeder).yield(shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
+      .bind(shootTrigger, new Orchestrator().yield(shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
       .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
     new FluentTrigger()
       .bind(hoodUpTrigger, shooter.new ChangeHood(0.1))

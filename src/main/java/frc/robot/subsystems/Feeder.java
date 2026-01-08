@@ -43,11 +43,13 @@ public class Feeder extends SubsystemBase {
 
         @Override
         public void initialize() {
+            System.out.println("enter " + state.name());
             Feeder.this.setState(state);
         }
 
         @Override
         public void end(boolean interrupted) {
+            System.out.println("exit " + state.name());
             Feeder.this.setState(FeederState.IDLE);
         }
     }

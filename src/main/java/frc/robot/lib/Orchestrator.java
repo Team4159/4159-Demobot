@@ -65,17 +65,25 @@ public class Orchestrator extends Command {
 
     @Override
     public void execute() {
-        if (runFinished)
+        if (runFinished) {
             return;
+        }
 
         boolean stacksRunFinished = true;
         for (Command stack : stacks) {
-            if (stack.isFinished() && stack instanceof Orchestrator) {
-                stack.initialize();
-            }
-            stack.execute();
-            if (!stack.isFinished()) {
-                stacksRunFinished = false;
+            if (stack instanceof Orchestrator) {
+                if (stack.isFinished()) {
+                    stack.initialize();
+                }
+                stack.execute();
+                if (!stack.isFinished()) {
+                    stacksRunFinished = false;
+                }
+            } else {
+                if (!stack.isFinished()) {
+                    stack.execute();
+                    stacksRunFinished = false;
+                }
             }
         }
 
@@ -298,7 +306,7 @@ public class Orchestrator extends Command {
 
     public Orchestrator command(String group, Command command) {
         addBlock(() -> {
-            commandRun(group, command);
+            addStack(group, command);
             return CommandBlockStatus.CONTINUE;
         });
         return this;
@@ -313,11 +321,11 @@ public class Orchestrator extends Command {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueCommand != null) {
-                    commandRun(trueGroup, trueCommand);
+                    addStack(trueGroup, trueCommand);
                 }
             } else {
                 if (falseCommand != null) {
-                    commandRun(falseGroup, falseCommand);
+                    addStack(falseGroup, falseCommand);
                 }
             }
             return CommandBlockStatus.CONTINUE;
@@ -468,11 +476,6 @@ public class Orchestrator extends Command {
         Orchestrator stack = (Orchestrator) addStack(group, new Orchestrator());
         callback.run();
         stack.run(callback::run);
-    }
-
-    private void commandRun(String group, Command command) {
-        addStack(group, command);
-        command.initialize();
     }
 
     private void addLabel(String name, int destination) {
