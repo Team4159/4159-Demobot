@@ -95,20 +95,21 @@ public final class Constants {
 
   public static class ShooterConstants {
     //IDs for all motors
-    public static final int leftShooterMotorId = 5;
-    public static final int rightShooterMotorId = 6;
-    public static final int hoodAdjusterMotorId = 7;
+    public static final int kLeftShooterMotorId = 5;
+    public static final int kRightShooterMotorId = 6;
+    public static final int kHoodAdjusterMotorId = 7;
 
     // hood angle ranges
     public static final double hoodAngleMin = Units.degreesToRotations(0);
     public static final double hoodAngleMax = Units.degreesToRotations(70);
-    public static final double hoodAngleOffset = Units.degreesToRadians(0);
+    public static final double hoodAngleOffset = Units.degreesToRotations(0);
+    public static final double hoodGearRatio = 1; // does not affect offset
 
     //----- tolerances: so if the motors/whatnot are a bit off, it'll still work------
     // pitch refers to the angle
     public static final double pitchTolerance = Units.degreesToRotations(5);
     // used the value for spinTolerance from FRC-2024 
-    public static final double spinTolerance = Math.PI/8;
+    public static final double spinTolerance = Units.radiansToRotations(Math.PI / 8);
 
     // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
     // efficient to have a range instead of set states

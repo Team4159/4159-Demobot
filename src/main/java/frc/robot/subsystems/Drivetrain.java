@@ -103,12 +103,11 @@ public class Drivetrain extends SubsystemBase {
             double leftDirection = 0, rightDirection = 0;
             if (rawMagnitude < ArcadeDriveConstants.kInputDeadzone) {
                 // do nothing
-            } else if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
-                leftDirection = forwardDirection;
-                rightDirection = forwardDirection;
             } else {
                 double rotationAlpha;
-                if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
+                if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
+                    rotationAlpha = forwardDirection;
+                } else if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
                     rotationAlpha = 0;
                 } else {
                     // range of analog motion that is outside of the buffer zones

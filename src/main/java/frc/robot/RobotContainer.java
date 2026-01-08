@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 import frc.robot.lib.FluentTrigger;
+import frc.robot.lib.Orchestrator;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Feeder;
@@ -41,6 +42,11 @@ public class RobotContainer {
   private final ArcadeDrive drive = drivetrain.new ArcadeDrive(driverController);
   private final TurretPositionControl turnTurret = turret.new TurretPositionControl(driverController);
 
+  private final Trigger shootTrigger = driverController.leftTrigger();
+  private final Trigger outtakeTrigger = driverController.a();
+  private final Trigger hoodUpTrigger = driverController.rightBumper();
+  private final Trigger hoodDownTrigger = driverController.rightTrigger(); 
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -67,16 +73,16 @@ public class RobotContainer {
    */
   private void configureBindings() {
     new FluentTrigger()
-      .setDefault(feeder.new SetState(FeederState.IDLE))
-      .bind(driverController.leftTrigger(), feeder.new SetState(FeederState.INTAKE))
-      .bind(driverController.a(), feeder.new SetState(FeederState.OUTTAKE));
+      .setDefault(feeder.new ChangeState(FeederState.IDLE))
+      .bind(shootTrigger, new Orchestrator().require(feeder).yield(shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
+      .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
     new FluentTrigger()
-      .bind(driverController.leftBumper(), shooter.new ChangeHood(0.01))
-      .bind(driverController.leftTrigger(), shooter.new ChangeHood(-0.01));
+      .bind(hoodUpTrigger, shooter.new ChangeHood(0.1))
+      .bind(hoodDownTrigger, shooter.new ChangeHood(-0.1));
     new FluentTrigger()
       .setDefault(shooter.new ControlSpin(ShooterState.OFF))
-      .bind(driverController.leftTrigger(), shooter.new ControlSpin(ShooterState.SHOOT))
-      .bind(driverController.a(), shooter.new ControlSpin(ShooterState.REVERSE));
+      .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
+      .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
   }
 
   /**

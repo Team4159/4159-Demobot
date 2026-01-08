@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,32 +19,47 @@ public class Shooter extends SubsystemBase {
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax leftMotor = new SparkMax(ShooterConstants.leftShooterMotorId, MotorType.kBrushless);
-    private final SparkMax rightMotor = new SparkMax(ShooterConstants.rightShooterMotorId, MotorType.kBrushless);
+    private final SparkMax leftMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
+    private final SparkMax rightMotor = new SparkMax(ShooterConstants.kRightShooterMotorId, MotorType.kBrushless);
     // one Neo 550
-    private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.hoodAdjusterMotorId, MotorType.kBrushless);
+    private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
     private double hoodAngle = 0;
+
+    private double shootSpeed = 0;
 
     public Shooter() {
         adjustHood(hoodAngle);
     }
 
     public void setSpeed(double speed) {
+        shootSpeed = speed;
         leftMotor.set(speed);
         rightMotor.set(speed);
     }
 
     public void adjustHood(double angle) {
-        hoodAdjuster.getClosedLoopController().setReference(angle + ShooterConstants.hoodAngleOffset, ControlType.kPosition);
+        hoodAngle = ShooterConstants.hoodGearRatio * angle + ShooterConstants.hoodAngleOffset;
+        hoodAdjuster.getClosedLoopController().setReference(hoodAngle, ControlType.kPosition);
     }
 
     public void stop() {
+        shootSpeed = 0;
         leftMotor.stopMotor();
         rightMotor.stopMotor();
     }
 
+    public boolean isShooterReady() {
+        if (shootSpeed == 0) {
+            return false;
+        }
+        boolean leftSteady = Math.abs(Math.abs(leftMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
+        boolean rightSteady = Math.abs(Math.abs(rightMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
+        return leftSteady && rightSteady;
+    }
+
     public class ChangeHood extends Command {
         private double angleDifferentialSpeed;
+        private double previousTime;
 
         // put joystick as parameter into command
         // run conversion that converts -1 to 1 range into range for angles
@@ -52,15 +68,21 @@ public class Shooter extends SubsystemBase {
             addRequirements(Shooter.this);
         }
 
-        public double throttleToAngle() {
+        public double throttleToAngle(double deltaTime) {
             // convert throttle to angle
-            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * 0.02, ShooterConstants.hoodAngleMin, ShooterConstants.hoodAngleMax);
+            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * deltaTime, ShooterConstants.hoodAngleMin, ShooterConstants.hoodAngleMax);
+        }
+
+        @Override
+        public void initialize() {
+            previousTime = MathSharedStore.getTimestamp();
         }
 
         // execute command (over and over running) call set function to correspond
         @Override
         public void execute() {
-            Shooter.this.adjustHood(throttleToAngle());
+            Shooter.this.adjustHood(throttleToAngle(MathSharedStore.getTimestamp() - previousTime));
+            previousTime = MathSharedStore.getTimestamp();
         }
     } // end change hood command
 
@@ -73,7 +95,7 @@ public class Shooter extends SubsystemBase {
         }
 
         @Override
-        public void execute() {
+        public void initialize() {
             Shooter.this.setSpeed(shooterState.speed);
         }
 

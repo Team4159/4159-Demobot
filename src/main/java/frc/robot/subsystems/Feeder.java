@@ -29,14 +29,14 @@ public class Feeder extends SubsystemBase {
     }
 
     public void setState(FeederState state) {
-        //leftMotor.set(state.speed);
-        rightMotor.set(state.speed);
+        leftMotor.set(state.speed);
+        //rightMotor.set(state.speed);
     }
 
-    public class SetState extends Command {
+    public class ChangeState extends Command {
         FeederState state;
 
-        public SetState(FeederState state) {
+        public ChangeState(FeederState state) {
             this.state = state;
             addRequirements(Feeder.this);
         }
