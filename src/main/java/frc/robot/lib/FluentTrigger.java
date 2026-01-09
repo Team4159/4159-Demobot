@@ -65,6 +65,7 @@ public class FluentTrigger {
             }
             if (defaultCommand != null && !defaultCommand.isScheduled()) {
                 defaultCommand.schedule();
+                activeCommand = defaultCommand;
             }
             return;
         }

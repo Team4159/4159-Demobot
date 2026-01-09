@@ -7,14 +7,17 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj.Timer;
+import org.opencv.objdetect.RefineParameters;
+
+import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import us.hebi.quickbuf.RepeatedString;
 
 public class Orchestrator extends Command {
 
     private enum CommandBlockStatus {
-        CONTINUE, JUMP, YIELD, EXIT
+        CONTINUE, STACK, JUMP, YIELD, EXIT
     }
 
     @FunctionalInterface
@@ -32,6 +35,10 @@ public class Orchestrator extends Command {
         public CommandBlockStatus run() {
             return callback.run();
         }
+    }
+
+    private class RepeatStack extends Orchestrator {
+
     }
 
     private final ArrayList<CommandBlock> blocks = new ArrayList<>();
@@ -71,7 +78,7 @@ public class Orchestrator extends Command {
 
         boolean stacksRunFinished = true;
         for (Command stack : stacks) {
-            if (stack instanceof Orchestrator) {
+            if (stack instanceof RepeatStack) {
                 if (stack.isFinished()) {
                     stack.initialize();
                 }
@@ -96,6 +103,9 @@ public class Orchestrator extends Command {
             CommandBlockStatus status = commandBlock.run();
             if (status == CommandBlockStatus.CONTINUE) {
                 runIndex++;
+            } else if (status == CommandBlockStatus.STACK) {
+                runIndex++;
+                stacksRunFinished = false;
             } else if (status == CommandBlockStatus.JUMP) {
                 // do nothing
             } else if (status == CommandBlockStatus.YIELD) {
@@ -124,7 +134,9 @@ public class Orchestrator extends Command {
             exitCallback.accept(interrupted);
         }
         for (Command stack : stacks) {
-            stack.cancel();
+            if (stack instanceof RepeatStack || !stack.isFinished()) {
+                stack.end(true);
+            }
         }
         stacks.clear();
         untrackedStacks.clear();
@@ -225,7 +237,7 @@ public class Orchestrator extends Command {
     public Orchestrator repeat(String group, Runnable callback) {
         addBlock(() -> {
             repeatRun(group, callback);
-            return CommandBlockStatus.CONTINUE;
+            return CommandBlockStatus.STACK;
         });
         return this;
     }
@@ -246,7 +258,7 @@ public class Orchestrator extends Command {
                     repeatRun(falseGroup, falseCallback);
                 }
             }
-            return CommandBlockStatus.CONTINUE;
+            return CommandBlockStatus.STACK;
         });
         return this;
     }
@@ -306,8 +318,8 @@ public class Orchestrator extends Command {
 
     public Orchestrator command(String group, Command command) {
         addBlock(() -> {
-            addStack(group, command);
-            return CommandBlockStatus.CONTINUE;
+            commandRun(group, command);
+            return CommandBlockStatus.STACK;
         });
         return this;
     }
@@ -328,7 +340,7 @@ public class Orchestrator extends Command {
                     addStack(falseGroup, falseCommand);
                 }
             }
-            return CommandBlockStatus.CONTINUE;
+            return CommandBlockStatus.STACK;
         });
         return this;
     }
@@ -468,14 +480,19 @@ public class Orchestrator extends Command {
     }
 
     private void repeatRun(String group, Runnable callback) {
-        Orchestrator stack = (Orchestrator) addStack(group, new Orchestrator());
+        RepeatStack stack = (RepeatStack) addStack(group, new RepeatStack());
         stack.run(callback::run);
     }
 
     private void fastrepeatRun(String group, Runnable callback) {
-        Orchestrator stack = (Orchestrator) addStack(group, new Orchestrator());
+        RepeatStack stack = (RepeatStack) addStack(group, new Orchestrator());
         callback.run();
         stack.run(callback::run);
+    }
+
+    private void commandRun(String group, Command command) {
+        addStack(group, command);
+        command.getRequirements().clear();
     }
 
     private void addLabel(String name, int destination) {
@@ -483,6 +500,6 @@ public class Orchestrator extends Command {
     }
 
     private double getTime() {
-        return Timer.getFPGATimestamp();
+        return MathSharedStore.getTimestamp();
     }
 }
