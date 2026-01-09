@@ -101,9 +101,7 @@ public class Drivetrain extends SubsystemBase {
                     .abs(Units.degreesToRadians(90) - Math.abs(absoluteAngleFromHorizontal));
 
             double leftDirection = 0, rightDirection = 0;
-            if (rawMagnitude < ArcadeDriveConstants.kInputDeadzone) {
-                // do nothing
-            } else {
+            if (rawMagnitude >= ArcadeDriveConstants.kInputDeadzone) {
                 double rotationAlpha;
                 if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
                     rotationAlpha = forwardDirection;
