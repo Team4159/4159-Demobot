@@ -54,7 +54,7 @@ public class Shooter extends SubsystemBase {
         }
         boolean leftSteady = Math.abs(Math.abs(leftMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
         boolean rightSteady = Math.abs(Math.abs(rightMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
-        return true;
+        return leftSteady && rightSteady;
     }
 
     public class ChangeHood extends Command {
