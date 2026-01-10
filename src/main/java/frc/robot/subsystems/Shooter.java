@@ -22,8 +22,8 @@ public class Shooter extends SubsystemBase {
     private final SparkMax shooterMotor = new SparkMax(ShooterConstants.kShooterMotorId, MotorType.kBrushless);
     // one Neo 550
     private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
-    private double hoodAngle = 0;
 
+    private double hoodAngle = 0;
     private double shootSpeed = 0;
 
     public Shooter() {
@@ -36,7 +36,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public void adjustHood(double angle) {
-        hoodAngle = ShooterConstants.hoodGearRatio * angle + ShooterConstants.hoodAngleOffset;
+        hoodAngle = ShooterConstants.kHoodGearRatio * angle + ShooterConstants.kHoodAngleOffset;
+        System.out.println(hoodAngle);
         hoodAdjuster.getClosedLoopController().setReference(hoodAngle, ControlType.kPosition);
     }
 
@@ -46,26 +47,26 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isShooterReady() {
-        if (shootSpeed == 0) {
+        if (shootSpeed <= 0) {
             return false;
         }
-        return Math.abs(Math.abs(shooterMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
+        return Math.abs(shooterMotor.getAlternateEncoder().getVelocity() - shootSpeed) <= ShooterConstants.kSpinTolerance;
     }
 
-    public class ChangeHood extends Command {
+    public class AdjustHood extends Command {
         private double angleDifferentialSpeed;
         private double previousTime;
 
         // put joystick as parameter into command
         // run conversion that converts -1 to 1 range into range for angles
-        public ChangeHood(double angleDifferentialSpeed) {
+        public AdjustHood(double angleDifferentialSpeed) {
             this.angleDifferentialSpeed = angleDifferentialSpeed;
             addRequirements(Shooter.this);
         }
 
         public double throttleToAngle(double deltaTime) {
             // convert throttle to angle
-            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * deltaTime, ShooterConstants.hoodAngleMin, ShooterConstants.hoodAngleMax);
+            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * deltaTime, ShooterConstants.kHoodAngleMinimum, ShooterConstants.kHoodAngleMaximum);
         }
 
         @Override

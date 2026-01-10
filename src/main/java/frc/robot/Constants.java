@@ -99,22 +99,23 @@ public final class Constants {
     public static final int kHoodAdjusterMotorId = 7;
 
     // hood angle ranges
-    public static final double hoodAngleMin = Units.degreesToRotations(0);
-    public static final double hoodAngleMax = Units.degreesToRotations(70);
-    public static final double hoodAngleOffset = Units.degreesToRotations(0);
-    public static final double hoodGearRatio = 1; // does not affect offset
+    public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
+    public static final double kHoodAngleMaximum = Units.degreesToRotations(70);
+    public static final double kHoodAngleOffset = Units.degreesToRotations(0);
+    public static final double kHoodGearRatio = 1.0; // does not affect offset
+    public static final double kHoodAdjustSpeed = 0.03;
 
     //----- tolerances: so if the motors/whatnot are a bit off, it'll still work------
     // pitch refers to the angle
-    public static final double pitchTolerance = Units.degreesToRotations(5);
+    public static final double kPitchTolerance = Units.degreesToRotations(5);
     // used the value for spinTolerance from FRC-2024 
-    public static final double spinTolerance = Units.radiansToRotations(Math.PI / 8);
+    public static final double kSpinTolerance = 5;
 
     // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
     // efficient to have a range instead of set states
     // REPLACE the values below with actual mins and maxes later (after testing).
-    public static final double minPitch = Units.degreesToRadians(14);
-    public static final double maxPitch = Units.rotationsToRadians(0.2);
+    public static final double kMinPitch = Units.degreesToRadians(14);
+    public static final double kMaxPitch = Units.rotationsToRadians(0.2);
 
     // ENUMS 
     public static enum ShooterState {

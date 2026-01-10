@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 import frc.robot.lib.FluentTrigger;
@@ -77,8 +78,8 @@ public class RobotContainer {
       .bind(shootTrigger, new Orchestrator().require(feeder).yield(shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
       .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
     new FluentTrigger()
-      .bind(hoodUpTrigger, shooter.new ChangeHood(0.1))
-      .bind(hoodDownTrigger, shooter.new ChangeHood(-0.1));
+      .bind(hoodUpTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed))
+      .bind(hoodDownTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed));
     new FluentTrigger()
       .setDefault(shooter.new ControlSpin(ShooterState.OFF))
       .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
