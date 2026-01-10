@@ -88,13 +88,13 @@ public class Turret extends SubsystemBase {
                 // convert turret position to rotations
                 previousSetpoint = setpoint;
                 setpoint = MathUtil.clamp(angleFromVertical,
-                        -TurretConstants.kTurretReverseLimit,
-                        TurretConstants.kTurretForwardLimit) * TurretConstants.kTurretMotorGearRatio;
+                        -TurretConstants.kTurretAngleMaximum,
+                        TurretConstants.kTurretAngleMinimum) * TurretConstants.kTurretMotorGearRatio;
 
                 // rumble if input is within range to let driver know the turret turning to a
                 // new setpoint
-                boolean angleWithinRange = angleFromVertical >= -TurretConstants.kTurretReverseLimit
-                        && angleFromVertical <= TurretConstants.kTurretForwardLimit;
+                boolean angleWithinRange = angleFromVertical >= -TurretConstants.kTurretAngleMaximum
+                        && angleFromVertical <= TurretConstants.kTurretAngleMinimum;
                 boolean setpointChanged = (setpoint != previousSetpoint);
                 if (angleWithinRange) {
                     HIDRumble.rumble(controller,

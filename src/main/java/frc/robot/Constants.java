@@ -67,14 +67,14 @@ public final class Constants {
 
     public static final double kTurretMotorGearRatio = 23 * 4; // approximated because we don't want to count teeth
 
-    public static final double kTurretForwardLimit = Units.degreesToRotations(30);
-    public static final double kTurretReverseLimit = Units.degreesToRotations(30);
+    public static final double kTurretAngleMinimum = Units.degreesToRotations(30);
+    public static final double kTurretAngleMaximum = Units.degreesToRotations(30);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
       kTurretMotorConfig.idleMode(IdleMode.kBrake);
       kTurretMotorConfig.softLimit
-          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretForwardLimit)
-          .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretReverseLimit);
+          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMinimum)
+          .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMaximum);
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
