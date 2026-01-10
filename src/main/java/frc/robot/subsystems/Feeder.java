@@ -25,7 +25,8 @@ public class Feeder extends SubsystemBase {
     }
 
     public Feeder() {
-        leftMotor.stopMotor();
+        //leftMotor.stopMotor();
+        rightMotor.stopMotor();
     }
 
     public void setState(FeederState state) {
@@ -34,7 +35,7 @@ public class Feeder extends SubsystemBase {
     }
 
     public class ChangeState extends Command {
-        FeederState state;
+        private final FeederState state;
 
         public ChangeState(FeederState state) {
             this.state = state;
