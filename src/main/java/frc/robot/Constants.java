@@ -100,7 +100,7 @@ public final class Constants {
 
     // hood angle ranges
     public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
-    public static final double kHoodAngleMaximum = Units.degreesToRotations(45);
+    public static final double kHoodAngleMaximum = Units.degreesToRotations(25);
     public static final double kHoodAngleOffset = Units.degreesToRotations(0);
     public static final double kHoodGearRatio = 25; // does not affect offset
     public static final double kHoodAdjustSpeed = 0.03;
