@@ -19,7 +19,7 @@ public class FluentTrigger {
     }
 
     public FluentTrigger setDefault(Command defaultCommand) {
-        if (defaultCommand != null) {
+        if (this.defaultCommand != null) {
             throw new IllegalStateException("FluentTrigger default command already set");
         }
         this.defaultCommand = defaultCommand;

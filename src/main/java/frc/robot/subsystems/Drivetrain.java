@@ -26,13 +26,13 @@ public class Drivetrain extends SubsystemBase {
     private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.kRightMotor2Id);
     {
         var leftMotorConfig = new MotorOutputConfigs()
-                .withInverted(InvertedValue.Clockwise_Positive)
+                .withInverted(InvertedValue.CounterClockwise_Positive)
                 .withNeutralMode(NeutralModeValue.Brake);
         leftMotor1.getConfigurator().apply(leftMotorConfig);
         leftMotor2.getConfigurator().apply(leftMotorConfig);
 
         var rightMotorConfig = new MotorOutputConfigs()
-                .withInverted(InvertedValue.CounterClockwise_Positive)
+                .withInverted(InvertedValue.Clockwise_Positive)
                 .withNeutralMode(NeutralModeValue.Brake);
         rightMotor1.getConfigurator().apply(rightMotorConfig);
         rightMotor2.getConfigurator().apply(rightMotorConfig);
