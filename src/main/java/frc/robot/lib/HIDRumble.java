@@ -26,11 +26,20 @@ public class HIDRumble {
 
     private static final HashMap<GenericHID, RumbleManager> rumbleManagerMap = new HashMap<>();
 
-    static {
-        new RumbleLooper();
-    };
+    @SuppressWarnings("unused")
+    private static final HIDRumble instance = new HIDRumble();
 
     private HIDRumble() {
+        new SubsystemBase() {
+            @Override
+            public void periodic() {
+                // update all rumble managers
+                for (Map.Entry<GenericHID, RumbleManager> rumbleManagerEntry : rumbleManagerMap.entrySet()) {
+                    RumbleManager rumbleManager = rumbleManagerEntry.getValue();
+                    rumbleManager.update();
+                }
+            }
+        };
     }
 
     public static void rumble(GenericHID hid, RumbleRequest rumbleRequest) {
@@ -45,23 +54,6 @@ public class HIDRumble {
 
     public static void enable(boolean enabled) {
         rumbleEnabled = enabled;
-    }
-
-    private static class RumbleLooper extends SubsystemBase {
-        @SuppressWarnings("unused")
-        private static final RumbleLooper instance = new RumbleLooper();
-
-        private RumbleLooper() {
-        }
-
-        @Override
-        public void periodic() {
-            // update all rumble managers
-            for (Map.Entry<GenericHID, RumbleManager> rumbleManagerEntry : rumbleManagerMap.entrySet()) {
-                RumbleManager rumbleManager = rumbleManagerEntry.getValue();
-                rumbleManager.update();
-            }
-        }
     }
 
     private static class RumbleManager {
