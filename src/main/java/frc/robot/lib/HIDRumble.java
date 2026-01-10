@@ -68,8 +68,8 @@ public class HIDRumble {
 
         public void request(RumbleRequest rumbleRequest) {
             rumbleRequestList.add(rumbleRequest);
-            if (rumbleRequest.getPriority() > highestPriorityRequestIndex) {
-                highestPriorityRequestIndex = rumbleRequest.getPriority();
+            if (rumbleRequest.priority > highestPriorityRequestIndex) {
+                highestPriorityRequestIndex = rumbleRequest.priority;
             }
         }
 
@@ -86,7 +86,7 @@ public class HIDRumble {
                     RumbleRequest rumbleRequest = removeIterator.next();
                     if (rumbleRequest.isExpired()) {
                         removeIterator.remove();
-                        if (rumbleRequest.getPriority() == highestPriorityRequestIndex) {
+                        if (rumbleRequest.priority == highestPriorityRequestIndex) {
                             removedHighestPriorityRequest = true;
                         }
                     }
@@ -104,20 +104,17 @@ public class HIDRumble {
         }
 
         private void setRumbleFromRequest(RumbleRequest rumbleRequest) {
-            RumbleType rumbleType = rumbleRequest.getRumbleType();
-            double strength = rumbleRequest.getStrength();
-
             double leftStrength = 0, rightStrength = 0;
-            switch (rumbleType) {
+            switch (rumbleRequest.rumbleType) {
                 case kLeftRumble:
-                    leftStrength = strength;
+                    leftStrength = rumbleRequest.strength;
                     break;
                 case kRightRumble:
-                    rightStrength = strength;
+                    rightStrength = rumbleRequest.strength;
                     break;
                 case kBothRumble:
-                    leftStrength = strength;
-                    rightStrength = strength;
+                    leftStrength = rumbleRequest.strength;
+                    rightStrength = rumbleRequest.strength;
                     break;
             }
             hid.setRumble(RumbleType.kLeftRumble, leftStrength);
@@ -127,8 +124,8 @@ public class HIDRumble {
         private void updateHighestPriorityRequestIndex() {
             highestPriorityRequestIndex = 0;
             for (RumbleRequest rumbleRequest : rumbleRequestList) {
-                if (rumbleRequest.getPriority() > highestPriorityRequestIndex) {
-                    highestPriorityRequestIndex = rumbleRequest.getPriority();
+                if (rumbleRequest.priority > highestPriorityRequestIndex) {
+                    highestPriorityRequestIndex = rumbleRequest.priority;
                 }
             }
         }
@@ -136,7 +133,7 @@ public class HIDRumble {
         private RumbleRequest getLatestHighestPriorityRequest() {
             for (int i = rumbleRequestList.size() - 1; i >= 0; i--) {
                 RumbleRequest rumbleRequest = rumbleRequestList.get(i);
-                if (rumbleRequest.getPriority() == highestPriorityRequestIndex) {
+                if (rumbleRequest.priority == highestPriorityRequestIndex) {
                     return rumbleRequest;
                 }
             }
@@ -145,9 +142,9 @@ public class HIDRumble {
     }
 
     public static class RumbleRequest {
-        private final double start, lifespan, strength;
-        private final RumbleType rumbleType;
-        private final int priority;
+        public final double start, lifespan, strength;
+        public final RumbleType rumbleType;
+        public final int priority;
 
         public RumbleRequest(RumbleType rumbleType, double strength, int priority, double lifespan) {
             this.start = Timer.getFPGATimestamp();
@@ -175,18 +172,6 @@ public class HIDRumble {
 
         public boolean isExpired() {
             return Timer.getFPGATimestamp() - start > lifespan;
-        }
-
-        public RumbleType getRumbleType() {
-            return rumbleType;
-        }
-
-        public double getStrength() {
-            return strength;
-        }
-
-        public int getPriority() {
-            return priority;
         }
     }
 }
