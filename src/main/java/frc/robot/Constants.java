@@ -78,8 +78,8 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        0.5, 0, 0,
-        new TrapezoidProfile.Constraints(250, 500));
+        0.05, 0, 0.01,
+        new TrapezoidProfile.Constraints(20, 30));
     public static final SimpleMotorFeedforward kTurretFeedForward = new SimpleMotorFeedforward(0, 0, 0);
 
     public static enum TurretState {
