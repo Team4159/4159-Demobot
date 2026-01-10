@@ -95,8 +95,7 @@ public final class Constants {
 
   public static class ShooterConstants {
     //IDs for all motors
-    public static final int kLeftShooterMotorId = 5;
-    public static final int kRightShooterMotorId = 6;
+    public static final int kShooterMotorId = 5;
     public static final int kHoodAdjusterMotorId = 7;
 
     // hood angle ranges

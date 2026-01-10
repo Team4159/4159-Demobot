@@ -19,8 +19,7 @@ public class Shooter extends SubsystemBase {
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax leftMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
-    private final SparkMax rightMotor = new SparkMax(ShooterConstants.kRightShooterMotorId, MotorType.kBrushless);
+    private final SparkMax shooterMotor = new SparkMax(ShooterConstants.kShooterMotorId, MotorType.kBrushless);
     // one Neo 550
     private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
     private double hoodAngle = 0;
@@ -33,8 +32,7 @@ public class Shooter extends SubsystemBase {
 
     public void setSpeed(double speed) {
         shootSpeed = speed;
-        leftMotor.set(speed);
-        rightMotor.set(speed);
+        shooterMotor.set(speed);
     }
 
     public void adjustHood(double angle) {
@@ -44,17 +42,14 @@ public class Shooter extends SubsystemBase {
 
     public void stop() {
         shootSpeed = 0;
-        leftMotor.stopMotor();
-        rightMotor.stopMotor();
+        shooterMotor.stopMotor();
     }
 
     public boolean isShooterReady() {
         if (shootSpeed == 0) {
             return false;
         }
-        boolean leftSteady = Math.abs(Math.abs(leftMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
-        boolean rightSteady = Math.abs(Math.abs(rightMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
-        return leftSteady && rightSteady;
+        return Math.abs(Math.abs(shooterMotor.getAlternateEncoder().getVelocity()) - shootSpeed) <= ShooterConstants.spinTolerance;
     }
 
     public class ChangeHood extends Command {
