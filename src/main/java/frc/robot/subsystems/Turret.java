@@ -80,26 +80,23 @@ public class Turret extends SubsystemBase {
                 double angle = Math.atan2(inputY, inputX);
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
-                double angleFromVertical = TurretConstants.kAngleScalar
+                double angleFromVertical = Units.radiansToRotations(TurretConstants.kAngleScalar
                         * (((angle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
                                 % Units.degreesToRadians(360))
-                                - Units.degreesToRadians(180));
-
-                // get turret position in radians
-                double positionRadians = MathUtil.clamp(angleFromVertical,
-                        Units.rotationsToRadians(-TurretConstants.kTurretReverseLimit),
-                        Units.rotationsToRadians(TurretConstants.kTurretForwardLimit));
+                                - Units.degreesToRadians(180)));
 
                 // convert turret position to rotations
                 previousSetpoint = setpoint;
-                setpoint = Units.radiansToRotations(positionRadians);
+                setpoint = MathUtil.clamp(angleFromVertical,
+                        -TurretConstants.kTurretReverseLimit,
+                        TurretConstants.kTurretForwardLimit) * TurretConstants.kTurretMotorGearRatio;
 
                 // rumble if input is within range to let driver know the turret turning to a
                 // new setpoint
-                boolean setpointWithinRange = previousSetpoint > -TurretConstants.kTurretReverseLimit
-                        && previousSetpoint < TurretConstants.kTurretForwardLimit;
+                boolean angleWithinRange = angleFromVertical >= -TurretConstants.kTurretReverseLimit
+                        && angleFromVertical <= TurretConstants.kTurretForwardLimit;
                 boolean setpointChanged = (setpoint != previousSetpoint);
-                if (setpointWithinRange) {
+                if (angleWithinRange) {
                     HIDRumble.rumble(controller,
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
                 } else if (setpointChanged) {
