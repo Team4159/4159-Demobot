@@ -9,27 +9,21 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class FluentTrigger {
     private Command activeCommand;
     private Command defaultCommand;
-    private ArrayList<Integer> activeStateQueue;
-    private ArrayList<CommandBind> triggerCommandBindList;
+    private final ArrayList<Integer> activeStateQueue = new ArrayList<Integer>();
+    private final ArrayList<CommandBind> triggerCommandBindList = new ArrayList<CommandBind>();
 
     public FluentTrigger() {
-        triggerCommandBindList = new ArrayList<CommandBind>();
-        activeStateQueue = new ArrayList<Integer>();
     }
 
-    private class CommandBind {
-        Trigger trigger;
-        Command command;
-
-        private CommandBind(Trigger trigger, Command command) {
-            this.trigger = trigger;
-            this.command = command;
-        }
+    private record CommandBind(Trigger trigger, Command command) {
     }
 
     public FluentTrigger setDefault(Command defaultCommand) {
-        this.activeCommand = defaultCommand;
+        if (defaultCommand != null) {
+            throw new IllegalStateException("FluentTrigger default command already set");
+        }
         this.defaultCommand = defaultCommand;
+        this.activeCommand = defaultCommand;
         updateState();
         return this;
     }
@@ -44,16 +38,18 @@ public class FluentTrigger {
     }
 
     private void addQueue(int state) {
-        if (activeStateQueue.indexOf(state) >= 0)
+        if (activeStateQueue.indexOf(state) >= 0) {
             return;
+        }
         activeStateQueue.add(state);
         updateState();
     }
 
     private void removeQueue(int state) {
         int index = activeStateQueue.indexOf(state);
-        if (index < 0)
+        if (index < 0) {
             return;
+        }
         activeStateQueue.remove(index);
         updateState();
     }
