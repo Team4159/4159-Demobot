@@ -22,7 +22,7 @@ import frc.robot.lib.HIDRumble.RumbleRequest;
 public class Turret extends SubsystemBase {
     private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
     {
-        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kResetSafeParameters,
+        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
     }
 
@@ -108,7 +108,7 @@ public class Turret extends SubsystemBase {
             double correctedSetpoint = setpoint * TurretConstants.kTurretMotorGearRatio;
             double pidVoltage = TurretConstants.kTurretProfiledPIDController
                     .calculate(turretMotor.getEncoder().getPosition(), correctedSetpoint);
-            double feedforwardVoltage = TurretConstants.kTurretFeedForward
+            double feedforwardVoltage = TurretConstants.kTurretFeedforward
                     .calculate(TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity);
             turretMotor.setVoltage(pidVoltage + feedforwardVoltage);
         }

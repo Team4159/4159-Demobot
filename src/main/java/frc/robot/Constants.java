@@ -78,9 +78,9 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        0.05, 0, 0.01,
+        0.05, 0.0, 0.0,
         new TrapezoidProfile.Constraints(20, 30));
-    public static final SimpleMotorFeedforward kTurretFeedForward = new SimpleMotorFeedforward(0, 0, 0);
+    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0, 0, 0);
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
@@ -95,14 +95,24 @@ public final class Constants {
 
   public static class ShooterConstants {
     //IDs for all motors
-    public static final int kShooterMotorId = 5;
+    public static final int kLeftShooterMotorId = 6;
+    public static final int kRightShooterMotorId = 5;
     public static final int kHoodAdjusterMotorId = 7;
 
+    // pid
+    public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
+        0.01, 0, 0,
+        new TrapezoidProfile.Constraints(50, 50)
+    );
+    {
+      kShooterProfiledPIDController.setTolerance(kSpinTolerance);
+    }
+    
     // hood angle ranges
     public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
-    public static final double kHoodAngleMaximum = Units.degreesToRotations(25);
+    public static final double kHoodAngleMaximum = Units.degreesToRotations(60);
     public static final double kHoodAngleOffset = Units.degreesToRotations(0);
-    public static final double kHoodGearRatio = 25; // does not affect offset
+    public static final double kHoodGearRatio = 25.0; // does not affect offset
     public static final double kHoodAdjustSpeed = 0.03;
 
     //----- tolerances: so if the motors/whatnot are a bit off, it'll still work------

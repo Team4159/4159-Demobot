@@ -15,13 +15,8 @@ public class Feeder extends SubsystemBase {
     private final SparkMax leftMotor = new SparkMax(FeederConstants.kLeftMotorId, MotorType.kBrushless);
     private final SparkMax rightMotor = new SparkMax(FeederConstants.kRightMotorId, MotorType.kBrushless);
     {
-        var leftMotorConfig = new SparkMaxConfig();
-        leftMotorConfig.inverted(false);
-        leftMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
-        var rightMotorConfig = new SparkMaxConfig();
-        rightMotorConfig.inverted(true);
-        rightMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        leftMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        rightMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public Feeder() {
@@ -29,7 +24,7 @@ public class Feeder extends SubsystemBase {
 
     public void setState(FeederState state) {
         leftMotor.set(state.speed);
-        //rightMotor.set(state.speed);
+        rightMotor.set(state.speed);
     }
 
     public class ChangeState extends Command {

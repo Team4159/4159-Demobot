@@ -10,7 +10,10 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class Shooter extends SubsystemBase {
     /*
@@ -19,20 +22,35 @@ public class Shooter extends SubsystemBase {
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax shooterMotor = new SparkMax(ShooterConstants.kShooterMotorId, MotorType.kBrushless);
+    private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
+    private final SparkMax rightShooterMotor = new SparkMax(ShooterConstants.kRightShooterMotorId, MotorType.kBrushless);
+    {
+        leftShooterMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    }
     // one Neo 550
     private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
+    {
+        hoodAdjuster.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    }
 
     private double hoodAngle = 0;
-    private double shootSpeed = 0;
 
     public Shooter() {
         adjustHood(hoodAngle);
     }
 
+    @Override
+    public void periodic() {
+        // motors should be at the same velocity because they are connected to the same axle
+        double axleVelocity = leftShooterMotor.getEncoder().getVelocity();
+        double shooterVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
+        leftShooterMotor.setVoltage(shooterVoltage);
+        rightShooterMotor.setVoltage(shooterVoltage);
+    }
+
     public void setSpeed(double speed) {
-        shootSpeed = speed;
-        shooterMotor.set(speed);
+        ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
 
     public void adjustHood(double angle) {
@@ -42,15 +60,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public void stop() {
-        shootSpeed = 0;
-        shooterMotor.stopMotor();
+        setSpeed(0);
+        rightShooterMotor.stopMotor();
     }
 
     public boolean isShooterReady() {
-        if (shootSpeed <= 0) {
+        if (ShooterConstants.kShooterProfiledPIDController.getGoal().position <= 0) {
             return false;
         }
-        return Math.abs(shooterMotor.getAlternateEncoder().getVelocity() - shootSpeed) <= ShooterConstants.kSpinTolerance;
+        return ShooterConstants.kShooterProfiledPIDController.atGoal();
     }
 
     public class AdjustHood extends Command {
