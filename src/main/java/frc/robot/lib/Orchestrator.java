@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Orchestrator extends Command {
 
     private enum CommandBlockStatus {
-        CONTINUE, STACK, JUMP, YIELD, EXIT
+        CONTINUE, JUMP, YIELD, EXIT
     }
 
     @FunctionalInterface
@@ -80,13 +80,9 @@ public class Orchestrator extends Command {
                     stack.initialize();
                 }
                 stack.execute();
-                if (!stack.isFinished()) {
-                    stacksRunFinished = false;
-                }
             } else {
                 if (!stack.isFinished()) {
                     stack.execute();
-                    stacksRunFinished = false;
                 }
             }
         }
@@ -100,9 +96,6 @@ public class Orchestrator extends Command {
             CommandBlockStatus status = commandBlock.run();
             if (status == CommandBlockStatus.CONTINUE) {
                 runIndex++;
-            } else if (status == CommandBlockStatus.STACK) {
-                runIndex++;
-                stacksRunFinished = false;
             } else if (status == CommandBlockStatus.JUMP) {
                 // do nothing
             } else if (status == CommandBlockStatus.YIELD) {
@@ -112,6 +105,13 @@ public class Orchestrator extends Command {
                 break;
             } else {
                 throw new IllegalStateException("Invalid CommandBlockStatus");
+            }
+        }
+
+        for (Command stack : stacks) {
+            if (!stack.isFinished()) {
+                stacksRunFinished = false;
+                break;
             }
         }
 
@@ -234,7 +234,7 @@ public class Orchestrator extends Command {
     public Orchestrator repeat(String group, Runnable callback) {
         addBlock(() -> {
             repeatRun(group, callback);
-            return CommandBlockStatus.STACK;
+            return CommandBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -255,7 +255,7 @@ public class Orchestrator extends Command {
                     repeatRun(falseGroup, falseCallback);
                 }
             }
-            return CommandBlockStatus.STACK;
+            return CommandBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -316,7 +316,7 @@ public class Orchestrator extends Command {
     public Orchestrator command(String group, Command command) {
         addBlock(() -> {
             commandRun(group, command);
-            return CommandBlockStatus.STACK;
+            return CommandBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -337,7 +337,7 @@ public class Orchestrator extends Command {
                     commandRun(falseGroup, falseCommand);
                 }
             }
-            return CommandBlockStatus.STACK;
+            return CommandBlockStatus.CONTINUE;
         });
         return this;
     }
