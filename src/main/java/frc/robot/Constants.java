@@ -65,10 +65,10 @@ public final class Constants {
     public static final double kInputDeadzone = 0.5;
     public static final double kAngleScalar = 1;
 
-    public static final double kTurretMotorGearRatio = 23 * 4; // approximated because we don't want to count teeth
+    public static final double kTurretMotorGearRatio = 54; // approximated because we don't want to count teeth
 
-    public static final double kTurretAngleMinimum = Units.degreesToRotations(30);
-    public static final double kTurretAngleMaximum = Units.degreesToRotations(30);
+    public static final double kTurretAngleMinimum = Units.degreesToRotations(45);
+    public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
       kTurretMotorConfig.idleMode(IdleMode.kBrake);
@@ -78,8 +78,8 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        0.05, 0.0, 0.0,
-        new TrapezoidProfile.Constraints(20, 30));
+        0.4, 0.05, 0.0,
+        new TrapezoidProfile.Constraints(50, 80));
     public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0, 0, 0);
 
     public static enum TurretState {
