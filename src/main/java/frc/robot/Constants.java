@@ -73,7 +73,7 @@ public final class Constants {
     {
       kTurretMotorConfig.idleMode(IdleMode.kBrake);
       kTurretMotorConfig.softLimit
-          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMinimum)
+          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum)
           .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMaximum);
     }
 
