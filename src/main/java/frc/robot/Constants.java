@@ -60,7 +60,7 @@ public final class Constants {
   }
 
   public static class TurretConstants {
-    public static final int kTurretSparkId = 9;
+    public static final int kTurretMotorId = 9;
 
     public static final double kInputDeadzone = 0.5;
     public static final double kAngleScalar = 1;

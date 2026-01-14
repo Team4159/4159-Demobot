@@ -20,7 +20,7 @@ import frc.robot.lib.HIDRumble;
 import frc.robot.lib.HIDRumble.RumbleRequest;
 
 public class Turret extends SubsystemBase {
-    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretSparkId, MotorType.kBrushless);
+    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretMotorId, MotorType.kBrushless);
     {
         turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kNoResetSafeParameters,
                 PersistMode.kNoPersistParameters);
