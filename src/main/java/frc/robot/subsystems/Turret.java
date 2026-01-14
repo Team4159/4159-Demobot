@@ -55,8 +55,8 @@ public class Turret extends SubsystemBase {
 
     public class TurretPositionControl extends Command {
         private final CommandXboxController controller;
-        private double setpoint = 0;
-        private double previousSetpoint = setpoint;
+        private double turretSetpoint = 0;
+        private double previousTurretSetpoint = turretSetpoint;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
@@ -65,8 +65,8 @@ public class Turret extends SubsystemBase {
 
         @Override
         public void initialize() {
-            setpoint = 0;
-            previousSetpoint = setpoint;
+            turretSetpoint = 0;
+            previousTurretSetpoint = turretSetpoint;
             TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
         }
 
@@ -86,16 +86,16 @@ public class Turret extends SubsystemBase {
                                 - Units.degreesToRadians(180)));
 
                 // convert turret position to rotations
-                previousSetpoint = setpoint;
-                setpoint = MathUtil.clamp(angleFromVertical,
-                        -TurretConstants.kTurretAngleMaximum,
-                        TurretConstants.kTurretAngleMinimum) * TurretConstants.kTurretMotorGearRatio;
+                previousTurretSetpoint = turretSetpoint;
+                turretSetpoint = MathUtil.clamp(angleFromVertical,
+                        TurretConstants.kTurretAngleMinimum,
+                        TurretConstants.kTurretAngleMaximum);
 
                 // rumble if input is within range to let driver know the turret turning to a
                 // new setpoint
-                boolean angleWithinRange = angleFromVertical >= -TurretConstants.kTurretAngleMaximum
-                        && angleFromVertical <= TurretConstants.kTurretAngleMinimum;
-                boolean setpointChanged = (setpoint != previousSetpoint);
+                boolean angleWithinRange = angleFromVertical >= TurretConstants.kTurretAngleMinimum
+                        && angleFromVertical <= TurretConstants.kTurretAngleMaximum;
+                boolean setpointChanged = (turretSetpoint != previousTurretSetpoint);
                 if (angleWithinRange) {
                     HIDRumble.rumble(controller,
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
@@ -105,9 +105,9 @@ public class Turret extends SubsystemBase {
                 }
             }
 
+            double motorSetpoint = turretSetpoint * TurretConstants.kTurretMotorGearRatio;
             double pidVoltage = TurretConstants.kTurretProfiledPIDController
-                    .calculate(turretMotor.getEncoder().getPosition(), setpoint);
-            System.out.println(setpoint);
+                    .calculate(turretMotor.getEncoder().getPosition(), motorSetpoint);
             double feedforwardVoltage = TurretConstants.kTurretFeedforward
                     .calculate(TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity);
             turretMotor.setVoltage(pidVoltage + feedforwardVoltage);

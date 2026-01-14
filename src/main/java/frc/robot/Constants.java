@@ -63,18 +63,18 @@ public final class Constants {
     public static final int kTurretMotorId = 9;
 
     public static final double kInputDeadzone = 0.5;
-    public static final double kAngleScalar = 1;
+    public static final double kAngleScalar = 1.0;
 
-    public static final double kTurretMotorGearRatio = 54; // approximated because we don't want to count teeth
+    public static final double kTurretMotorGearRatio = 5.0;
 
-    public static final double kTurretAngleMinimum = Units.degreesToRotations(45);
+    public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
     public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
       kTurretMotorConfig.idleMode(IdleMode.kBrake);
       kTurretMotorConfig.softLimit
-          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum)
-          .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMaximum);
+          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum * kTurretMotorGearRatio)
+          .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
