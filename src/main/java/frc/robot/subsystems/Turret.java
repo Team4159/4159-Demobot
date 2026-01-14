@@ -55,8 +55,7 @@ public class Turret extends SubsystemBase {
 
     public class TurretPositionControl extends Command {
         private final CommandXboxController controller;
-        private double turretSetpoint = 0;
-        private double previousTurretSetpoint = turretSetpoint;
+        private double turretSetpoint;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
@@ -66,7 +65,6 @@ public class Turret extends SubsystemBase {
         @Override
         public void initialize() {
             turretSetpoint = 0;
-            previousTurretSetpoint = turretSetpoint;
             TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
         }
 
@@ -84,24 +82,16 @@ public class Turret extends SubsystemBase {
                         * (((angle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
                                 % Units.degreesToRadians(360))
                                 - Units.degreesToRadians(180)));
-
-                // convert turret position to rotations
-                previousTurretSetpoint = turretSetpoint;
-                turretSetpoint = MathUtil.clamp(angleFromVertical,
-                        TurretConstants.kTurretAngleMinimum,
-                        TurretConstants.kTurretAngleMaximum);
-
-                // rumble if input is within range to let driver know the turret turning to a
-                // new setpoint
                 boolean angleWithinRange = angleFromVertical >= TurretConstants.kTurretAngleMinimum
                         && angleFromVertical <= TurretConstants.kTurretAngleMaximum;
-                boolean setpointChanged = (turretSetpoint != previousTurretSetpoint);
+
+                // convert turret position to rotations
                 if (angleWithinRange) {
+                    turretSetpoint = MathUtil.clamp(angleFromVertical,
+                            TurretConstants.kTurretAngleMinimum,
+                            TurretConstants.kTurretAngleMaximum);
                     HIDRumble.rumble(controller,
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
-                } else if (setpointChanged) {
-                    HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kLeftRumble,
-                            RumbleConstants.kTurretTurnFeedbackValue, 0, 0.2));
                 }
             }
 
