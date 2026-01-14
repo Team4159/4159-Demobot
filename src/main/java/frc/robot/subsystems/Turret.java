@@ -87,9 +87,7 @@ public class Turret extends SubsystemBase {
 
                 // convert turret position to rotations
                 if (angleWithinRange) {
-                    turretSetpoint = MathUtil.clamp(angleFromVertical,
-                            TurretConstants.kTurretAngleMinimum,
-                            TurretConstants.kTurretAngleMaximum);
+                    turretSetpoint = angleFromVertical;
                     HIDRumble.rumble(controller,
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
                 }
