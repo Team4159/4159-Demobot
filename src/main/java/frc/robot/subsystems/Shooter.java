@@ -6,6 +6,7 @@ import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 
@@ -35,6 +36,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private double hoodAngle = 0;
+    private double speed = 0;
 
     public Shooter() {
         adjustHood(hoodAngle);
@@ -44,18 +46,22 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         // motors should be at the same velocity because they are connected to the same axle
         double axleVelocity = leftShooterMotor.getEncoder().getVelocity();
-        double shooterVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
-        leftShooterMotor.setVoltage(shooterVoltage);
-        rightShooterMotor.setVoltage(shooterVoltage);
+        double shooterVoltage = ShooterConstants.kShooterPIDController.calculate(axleVelocity);
+        double ffVoltage = ShooterConstants.kShooterFeedForward.calculate(ShooterConstants.kShooterPIDController.getSetpoint().velocity);
+        System.out.println("axlevelocity: " +  axleVelocity + " shooterVoltage: " + shooterVoltage + " speed: " + speed);
+        leftShooterMotor.set(shooterVoltage + ffVoltage);
+        rightShooterMotor.set(shooterVoltage + ffVoltage);
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
+        //System.out.println(speed);
+        ShooterConstants.kShooterPIDController.setGoal(speed);
+        this.speed = speed;
     }
 
     public void adjustHood(double angle) {
         hoodAngle = ShooterConstants.kHoodGearRatio * angle + ShooterConstants.kHoodAngleOffset;
-        System.out.println(hoodAngle);
+        //System.out.println(hoodAngle);
         hoodAdjuster.getClosedLoopController().setReference(hoodAngle, ControlType.kPosition);
     }
 
@@ -65,10 +71,12 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isShooterReady() {
-        if (ShooterConstants.kShooterProfiledPIDController.getGoal().position <= 0) {
-            return false;
-        }
-        return ShooterConstants.kShooterProfiledPIDController.atGoal();
+        // if (ShooterConstants.kShooterPIDController.getSetpoint().velocity <= 0) {
+        //     return false;
+        // }
+        // return ShooterConstants.kShooterPIDController.atSetpoint();
+
+        return Math.abs(speed - leftShooterMotor.getEncoder().getVelocity()) <= Constants.ShooterConstants.kSpinTolerance;
     }
 
     public class AdjustHood extends Command {

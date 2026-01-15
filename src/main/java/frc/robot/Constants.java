@@ -49,7 +49,7 @@ public final class Constants {
     public static final int kRightMotorId = 2;
 
     public static enum FeederState {
-      IDLE(0), INTAKE(0.15), OUTTAKE(-0.15);
+      IDLE(0), INTAKE(0.5), OUTTAKE(-0.15);
 
       public double speed;
       
@@ -65,22 +65,22 @@ public final class Constants {
     public static final double kInputDeadzone = 0.5;
     public static final double kAngleScalar = 1.0;
 
-    public static final double kTurretMotorGearRatio = 5.0;
+    public static final double kTurretMotorGearRatio = 54.0;
 
     public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
     public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
-      kTurretMotorConfig.idleMode(IdleMode.kBrake);
+      kTurretMotorConfig.idleMode(IdleMode.kBrake).inverted(true);
       kTurretMotorConfig.softLimit
           .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum * kTurretMotorGearRatio)
           .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        0.4, 0.05, 0.0,
-        new TrapezoidProfile.Constraints(50, 80));
-    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0, 0, 0);
+        1, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(75, 150));
+    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.2, 0, 0);
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
@@ -100,12 +100,12 @@ public final class Constants {
     public static final int kHoodAdjusterMotorId = 7;
 
     // pid
-    public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
-        0.01, 0, 0,
-        new TrapezoidProfile.Constraints(50, 50)
-    );
+    public static final ProfiledPIDController kShooterPIDController = new ProfiledPIDController(
+        0.000012, 0, 0,
+        new TrapezoidProfile.Constraints(25, 50));
+    public static final SimpleMotorFeedforward kShooterFeedForward = new SimpleMotorFeedforward(0.1, 0.2);
     {
-      kShooterProfiledPIDController.setTolerance(kSpinTolerance);
+      kShooterPIDController.setTolerance(kSpinTolerance);
     }
     
     // hood angle ranges
@@ -119,7 +119,7 @@ public final class Constants {
     // pitch refers to the angle
     public static final double kPitchTolerance = Units.degreesToRotations(5);
     // used the value for spinTolerance from FRC-2024 
-    public static final double kSpinTolerance = 5;
+    public static final double kSpinTolerance = 500;
 
     // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
     // efficient to have a range instead of set states
@@ -129,7 +129,7 @@ public final class Constants {
 
     // ENUMS 
     public static enum ShooterState {
-      OFF(0), SHOOT(0.67), REVERSE(-0.67);
+      OFF(0), SHOOT(5000), REVERSE(-0.067);
 
       public double speed;
 

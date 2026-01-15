@@ -55,6 +55,7 @@ public class Turret extends SubsystemBase {
     public class TurretPositionControl extends Command {
         private final CommandXboxController controller;
         private double turretSetpoint;
+        private boolean previousTurretSetpointWithinRange;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
@@ -64,6 +65,7 @@ public class Turret extends SubsystemBase {
         @Override
         public void initialize() {
             turretSetpoint = 0;
+            previousTurretSetpointWithinRange = false;
             TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
         }
 
@@ -81,14 +83,20 @@ public class Turret extends SubsystemBase {
                         * (((angle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
                                 % Units.degreesToRadians(360))
                                 - Units.degreesToRadians(180)));
-                boolean angleWithinRange = angleFromVertical >= TurretConstants.kTurretAngleMinimum
+                boolean turretSetpointWithinRange = angleFromVertical >= TurretConstants.kTurretAngleMinimum
                         && angleFromVertical <= TurretConstants.kTurretAngleMaximum;
 
                 // convert turret position to rotations
-                if (angleWithinRange) {
+                if (turretSetpointWithinRange) {
                     turretSetpoint = angleFromVertical;
                     HIDRumble.rumble(controller,
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
+                } else if (previousTurretSetpointWithinRange) {
+                    if (angleFromVertical > 0) {
+                        turretSetpoint = TurretConstants.kTurretAngleMaximum;
+                    } else {
+                        turretSetpoint = TurretConstants.kTurretAngleMinimum;
+                    }
                 }
             }
 
