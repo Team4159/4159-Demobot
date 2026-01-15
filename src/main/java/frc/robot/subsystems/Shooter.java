@@ -111,7 +111,7 @@ public class Shooter extends SubsystemBase {
 
     // controls the spin of the shooter
     public class ControlSpin extends Command {
-        ShooterState shooterState;
+        private final ShooterState shooterState;
 
         public ControlSpin(ShooterState shooterState) {
             this.shooterState = shooterState;

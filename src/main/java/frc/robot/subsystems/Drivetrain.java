@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -15,9 +14,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import frc.robot.Constants.ArcadeDriveConstants;
 import frc.robot.Constants.DrivetrainConstants;
-import frc.robot.Constants.RumbleConstants;
-import frc.robot.lib.HIDRumble.RumbleRequest;
-import frc.robot.lib.HIDRumble;
 
 public class Drivetrain extends SubsystemBase {
     private final TalonFX leftMotor1 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor1Id);
@@ -114,12 +110,6 @@ public class Drivetrain extends SubsystemBase {
                     double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
                     rotationAlpha = MathUtil.clamp(forwardDirection * (relativeAngle / analogRange), -1, 1);
                 }
-
-                // rumble for rotation
-                double rumbleAlpha = 1 - Math.abs(rotationAlpha);
-                double rumbleStrength = (rumbleAlpha == 1) ? RumbleConstants.kArcadeDriveRotateValue
-                        : rumbleAlpha * RumbleConstants.kArcadeDriveIntermediateRotateValue;
-                HIDRumble.rumble(controller, new RumbleRequest(RumbleType.kRightRumble, rumbleStrength, 1));
 
                 // get directions
                 // 90 to 0 degrees: lerp from (-1, -1) to (-1, 1)

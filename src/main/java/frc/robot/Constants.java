@@ -62,8 +62,8 @@ public final class Constants {
   public static class TurretConstants {
     public static final int kTurretMotorId = 9;
 
-    public static final double kInputDeadzone = 0.5;
-    public static final double kAngleScalar = 1.0;
+    public static final double kInputDeadzone = 0.75;
+    public static final double kAngleScalar = 0.5;
 
     public static final double kTurretMotorGearRatio = 54.0;
 
@@ -140,8 +140,7 @@ public final class Constants {
   }
 
   public static class RumbleConstants {
-    public static final double kArcadeDriveIntermediateRotateValue = 0.1;
-    public static final double kArcadeDriveRotateValue = 0.2;
     public static final double kTurretTurnFeedbackValue = 0.2;
+    public static final double kTurretTripFeedbackValue = 0.2;
   }
 }

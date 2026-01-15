@@ -55,7 +55,9 @@ public class Turret extends SubsystemBase {
     public class TurretPositionControl extends Command {
         private final CommandXboxController controller;
         private double turretSetpoint;
+
         private boolean previousTurretSetpointWithinRange;
+        private double previousWantedTurretSetpoint;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
@@ -66,6 +68,7 @@ public class Turret extends SubsystemBase {
         public void initialize() {
             turretSetpoint = 0;
             previousTurretSetpointWithinRange = false;
+            previousWantedTurretSetpoint = turretSetpoint;
             TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
         }
 
@@ -79,25 +82,29 @@ public class Turret extends SubsystemBase {
                 double angle = Math.atan2(inputY, inputX);
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
-                double angleFromVertical = Units.radiansToRotations(TurretConstants.kAngleScalar
+                double wantedTurretSetpoint = Units.radiansToRotations(TurretConstants.kAngleScalar
                         * (((angle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
                                 % Units.degreesToRadians(360))
                                 - Units.degreesToRadians(180)));
-                boolean turretSetpointWithinRange = angleFromVertical >= TurretConstants.kTurretAngleMinimum
-                        && angleFromVertical <= TurretConstants.kTurretAngleMaximum;
+                boolean turretSetpointWithinRange = wantedTurretSetpoint >= TurretConstants.kTurretAngleMinimum
+                        && wantedTurretSetpoint <= TurretConstants.kTurretAngleMaximum;
 
                 // convert turret position to rotations
                 if (turretSetpointWithinRange) {
-                    turretSetpoint = angleFromVertical;
+                    turretSetpoint = wantedTurretSetpoint;
                     HIDRumble.rumble(controller,
                             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
                 } else if (previousTurretSetpointWithinRange) {
-                    if (angleFromVertical > 0) {
+                    if (previousWantedTurretSetpoint > 0) {
                         turretSetpoint = TurretConstants.kTurretAngleMaximum;
                     } else {
                         turretSetpoint = TurretConstants.kTurretAngleMinimum;
                     }
+                    HIDRumble.rumble(controller,
+                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripFeedbackValue, 0, 0.3));
                 }
+                previousTurretSetpointWithinRange = turretSetpointWithinRange;
+                previousWantedTurretSetpoint = wantedTurretSetpoint;
             }
 
             // invert since SparkMax.setVoltage() is agnostic to inverse
