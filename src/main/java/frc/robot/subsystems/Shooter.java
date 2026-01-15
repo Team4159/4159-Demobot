@@ -48,9 +48,10 @@ public class Shooter extends SubsystemBase {
         double axleVelocity = leftShooterMotor.getEncoder().getVelocity();
         double shooterVoltage = ShooterConstants.kShooterPIDController.calculate(axleVelocity);
         double ffVoltage = ShooterConstants.kShooterFeedForward.calculate(ShooterConstants.kShooterPIDController.getSetpoint().velocity);
-        System.out.println("axlevelocity: " +  axleVelocity + " shooterVoltage: " + shooterVoltage + " speed: " + speed);
-        leftShooterMotor.set(shooterVoltage + ffVoltage);
-        rightShooterMotor.set(shooterVoltage + ffVoltage);
+        double motorVoltage = (shooterVoltage / ffVoltage) / 12.0;
+        //System.out.println("axlevelocity: " +  axleVelocity + " shooterVoltage: " + shooterVoltage + " speed: " + speed);
+        leftShooterMotor.set(motorVoltage);
+        rightShooterMotor.set(motorVoltage);
     }
 
     public void setSpeed(double speed) {

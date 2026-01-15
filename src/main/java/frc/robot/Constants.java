@@ -71,10 +71,10 @@ public final class Constants {
     public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
-      kTurretMotorConfig.idleMode(IdleMode.kBrake).inverted(true);
-      kTurretMotorConfig.softLimit
-          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum * kTurretMotorGearRatio)
-          .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
+      kTurretMotorConfig.idleMode(IdleMode.kCoast);
+      // kTurretMotorConfig.softLimit
+      //     .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum * kTurretMotorGearRatio)
+      //     .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
@@ -129,7 +129,7 @@ public final class Constants {
 
     // ENUMS 
     public static enum ShooterState {
-      OFF(0), SHOOT(5000), REVERSE(-0.067);
+      OFF(0), SHOOT(5000), REVERSE(-1000);
 
       public double speed;
 

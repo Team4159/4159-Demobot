@@ -100,7 +100,8 @@ public class Turret extends SubsystemBase {
                 }
             }
 
-            double motorSetpoint = turretSetpoint * TurretConstants.kTurretMotorGearRatio;
+            // invert since SparkMax.setVoltage() is agnostic to inverse
+            double motorSetpoint = -turretSetpoint * TurretConstants.kTurretMotorGearRatio;
             double pidVoltage = TurretConstants.kTurretProfiledPIDController
                     .calculate(turretMotor.getEncoder().getPosition(), motorSetpoint);
             double feedforwardVoltage = TurretConstants.kTurretFeedforward
