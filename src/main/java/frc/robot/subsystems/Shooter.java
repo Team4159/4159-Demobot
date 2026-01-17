@@ -36,7 +36,6 @@ public class Shooter extends SubsystemBase {
     }
 
     private double hoodAngle = 0;
-    private double speed = 0;
 
     public Shooter() {
         adjustHood(hoodAngle);
@@ -45,19 +44,18 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         // motors should be at the same velocity because they are connected to the same axle
-        double axleVelocity = leftShooterMotor.getEncoder().getVelocity();
-        double shooterVoltage = ShooterConstants.kShooterPIDController.calculate(axleVelocity);
-        double ffVoltage = ShooterConstants.kShooterFeedForward.calculate(ShooterConstants.kShooterPIDController.getSetpoint().velocity);
-        double motorVoltage = (shooterVoltage / ffVoltage) / 12.0;
-        //System.out.println("axlevelocity: " +  axleVelocity + " shooterVoltage: " + shooterVoltage + " speed: " + speed);
-        leftShooterMotor.set(motorVoltage);
-        rightShooterMotor.set(motorVoltage);
+        // convert rpm to rps
+        double axleVelocity = leftShooterMotor.getEncoder().getVelocity() / 60.0;
+        double motorVoltage = ShooterConstants.kShooterPIDController.calculate(axleVelocity);
+        System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
+        leftShooterMotor.setVoltage(motorVoltage);
+        rightShooterMotor.setVoltage(motorVoltage);
     }
 
     public void setSpeed(double speed) {
-        //System.out.println(speed);
+        ShooterConstants.kShooterPIDController.reset(leftShooterMotor.getEncoder().getVelocity() / 60.0);
+        System.out.println(speed);
         ShooterConstants.kShooterPIDController.setGoal(speed);
-        this.speed = speed;
     }
 
     public void adjustHood(double angle) {
@@ -66,18 +64,11 @@ public class Shooter extends SubsystemBase {
         hoodAdjuster.getClosedLoopController().setReference(hoodAngle, ControlType.kPosition);
     }
 
-    public void stop() {
-        setSpeed(0);
-        rightShooterMotor.stopMotor();
-    }
-
     public boolean isShooterReady() {
-        // if (ShooterConstants.kShooterPIDController.getSetpoint().velocity <= 0) {
-        //     return false;
-        // }
-        // return ShooterConstants.kShooterPIDController.atSetpoint();
-
-        return Math.abs(speed - leftShooterMotor.getEncoder().getVelocity()) <= Constants.ShooterConstants.kSpinTolerance;
+        if (ShooterConstants.kShooterPIDController.getGoal().velocity <= 0) {
+            return false;
+        }
+        return ShooterConstants.kShooterPIDController.atGoal();
     }
 
     public class AdjustHood extends Command {
@@ -124,7 +115,7 @@ public class Shooter extends SubsystemBase {
 
         @Override
         public void end(boolean interupted) {
-            Shooter.this.stop();
+            Shooter.this.setSpeed(ShooterState.IDLE.speed);
         }
     }
 }

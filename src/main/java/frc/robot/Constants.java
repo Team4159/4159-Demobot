@@ -63,12 +63,12 @@ public final class Constants {
     public static final int kTurretMotorId = 9;
 
     public static final double kInputDeadzone = 0.75;
-    public static final double kAngleScalar = 0.5;
+    public static final double kAngleScalar = 1;
 
     public static final double kTurretMotorGearRatio = 54.0;
 
-    public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
-    public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
+    public static final double kTurretAngleMinimum = Units.degreesToRotations(-180);
+    public static final double kTurretAngleMaximum = Units.degreesToRotations(180);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
       kTurretMotorConfig.idleMode(IdleMode.kCoast);
@@ -78,9 +78,9 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        1, 0.0, 0.0,
-        new TrapezoidProfile.Constraints(75, 150));
-    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.2, 0, 0);
+        1, 0.0, 0.01,
+        new TrapezoidProfile.Constraints(100, 200));
+    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.5, 0, 0);
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
@@ -101,9 +101,8 @@ public final class Constants {
 
     // pid
     public static final ProfiledPIDController kShooterPIDController = new ProfiledPIDController(
-        0.000012, 0, 0,
-        new TrapezoidProfile.Constraints(25, 50));
-    public static final SimpleMotorFeedforward kShooterFeedForward = new SimpleMotorFeedforward(0.1, 0.2);
+        0.25, 0, 0,
+        new TrapezoidProfile.Constraints(60, 60));
     {
       kShooterPIDController.setTolerance(kSpinTolerance);
     }
@@ -119,7 +118,7 @@ public final class Constants {
     // pitch refers to the angle
     public static final double kPitchTolerance = Units.degreesToRotations(5);
     // used the value for spinTolerance from FRC-2024 
-    public static final double kSpinTolerance = 500;
+    public static final double kSpinTolerance = 5;
 
     // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
     // efficient to have a range instead of set states
@@ -129,9 +128,9 @@ public final class Constants {
 
     // ENUMS 
     public static enum ShooterState {
-      OFF(0), SHOOT(5000), REVERSE(-1000);
+      IDLE(0), SHOOT(80), REVERSE(-10);
 
-      public double speed;
+      public final double speed;
 
       private ShooterState(double speed) {
         this.speed = speed;

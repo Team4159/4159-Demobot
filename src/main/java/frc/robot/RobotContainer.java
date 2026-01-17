@@ -77,12 +77,12 @@ public class RobotContainer {
     .bind(hoodUpTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed))
     .bind(hoodDownTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed));
     new FluentTrigger()
-    .setDefault(shooter.new ControlSpin(ShooterState.OFF))
+    .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
     .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
     .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
     new FluentTrigger()
       .setDefault(feeder.new ChangeState(FeederState.IDLE))
-      .bind(shootTrigger, new Orchestrator().require(feeder).yield(shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
+      .bind(shootTrigger, new Orchestrator().require(feeder).yield(5, shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
       .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
   }
 
