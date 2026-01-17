@@ -100,11 +100,11 @@ public final class Constants {
     public static final int kHoodAdjusterMotorId = 7;
 
     // pid
-    public static final ProfiledPIDController kShooterPIDController = new ProfiledPIDController(
+    public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
         0.25, 0, 0,
         new TrapezoidProfile.Constraints(60, 60));
     {
-      kShooterPIDController.setTolerance(kSpinTolerance);
+      kShooterProfiledPIDController.setTolerance(kSpinTolerance);
     }
     
     // hood angle ranges

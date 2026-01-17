@@ -45,16 +45,16 @@ public class Shooter extends SubsystemBase {
         // motors should be at the same velocity because they are connected to the same axle
         // convert rpm to rps
         double axleVelocity = getAxleVelocity();
-        double motorVoltage = ShooterConstants.kShooterPIDController.calculate(axleVelocity);
+        double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
         //System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
         leftShooterMotor.setVoltage(motorVoltage);
         rightShooterMotor.setVoltage(motorVoltage);
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterPIDController.reset(getAxleVelocity());
+        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocity());
         //System.out.println(speed);
-        ShooterConstants.kShooterPIDController.setGoal(speed);
+        ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
 
     public void adjustHood(double angle) {
@@ -64,10 +64,10 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isShooterReady() {
-        if (ShooterConstants.kShooterPIDController.getGoal().velocity <= 0) {
+        if (ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <= 0) {
             return false;
         }
-        return ShooterConstants.kShooterPIDController.atGoal();
+        return ShooterConstants.kShooterProfiledPIDController.atGoal();
     }
 
     private double getAxleVelocity() {
