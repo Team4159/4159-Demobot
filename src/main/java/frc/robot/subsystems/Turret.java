@@ -30,7 +30,7 @@ public class Turret extends SubsystemBase {
     }
 
     private void setState(TurretState turretState) {
-        turretMotor.set(turretState.motorSpeed);
+        turretMotor.set(turretState.speed);
     }
 
     public class TurnTurret extends Command {

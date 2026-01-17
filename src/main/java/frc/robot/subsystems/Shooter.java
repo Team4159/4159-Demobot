@@ -6,7 +6,6 @@ import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 
@@ -45,16 +44,16 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         // motors should be at the same velocity because they are connected to the same axle
         // convert rpm to rps
-        double axleVelocity = leftShooterMotor.getEncoder().getVelocity() / 60.0;
+        double axleVelocity = getAxleVelocity();
         double motorVoltage = ShooterConstants.kShooterPIDController.calculate(axleVelocity);
-        System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
+        //System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
         leftShooterMotor.setVoltage(motorVoltage);
         rightShooterMotor.setVoltage(motorVoltage);
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterPIDController.reset(leftShooterMotor.getEncoder().getVelocity() / 60.0);
-        System.out.println(speed);
+        ShooterConstants.kShooterPIDController.reset(getAxleVelocity());
+        //System.out.println(speed);
         ShooterConstants.kShooterPIDController.setGoal(speed);
     }
 
@@ -69,6 +68,10 @@ public class Shooter extends SubsystemBase {
             return false;
         }
         return ShooterConstants.kShooterPIDController.atGoal();
+    }
+
+    private double getAxleVelocity() {
+        return leftShooterMotor.getEncoder().getVelocity() / 60.0;
     }
 
     public class AdjustHood extends Command {

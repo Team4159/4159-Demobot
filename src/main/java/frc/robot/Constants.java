@@ -51,7 +51,7 @@ public final class Constants {
     public static enum FeederState {
       IDLE(0), INTAKE(0.5), OUTTAKE(-0.15);
 
-      public double speed;
+      public final double speed;
       
       private FeederState(double speed) {
         this.speed = speed;
@@ -79,16 +79,16 @@ public final class Constants {
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
         1, 0.0, 0.01,
-        new TrapezoidProfile.Constraints(100, 200));
+        new TrapezoidProfile.Constraints(50, 200));
     public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.5, 0, 0);
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
 
-      public double motorSpeed;
+      public final double speed;
 
       private TurretState(double speed) {
-        motorSpeed = speed;
+        this.speed = speed;
       }
     }
   }
