@@ -63,12 +63,12 @@ public final class Constants {
     public static final int kTurretMotorId = 9;
 
     public static final double kInputDeadzone = 0.75;
-    public static final double kAngleScalar = 1;
+    public static final double kAngleScalar = 0.5;
 
     public static final double kTurretMotorGearRatio = 54.0;
 
-    public static final double kTurretAngleMinimum = Units.degreesToRotations(-180);
-    public static final double kTurretAngleMaximum = Units.degreesToRotations(180);
+    public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
+    public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     {
       kTurretMotorConfig.idleMode(IdleMode.kCoast);
