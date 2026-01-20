@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class Shooter extends SubsystemBase {
@@ -25,8 +26,17 @@ public class Shooter extends SubsystemBase {
     private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
     private final SparkMax rightShooterMotor = new SparkMax(ShooterConstants.kRightShooterMotorId, MotorType.kBrushless);
     {
-        leftShooterMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        // rpm to rps
+        double velocityConversionFactor = 1.0 / 60.0;
+
+        SparkMaxConfig leftShooterConfig = new SparkMaxConfig();
+        leftShooterConfig.inverted(false).apply(new EncoderConfig().velocityConversionFactor(velocityConversionFactor));
+        
+        SparkMaxConfig rightShooterConfig = new SparkMaxConfig();
+        rightShooterConfig.inverted(true).apply(new EncoderConfig().velocityConversionFactor(velocityConversionFactor));
+
+        leftShooterMotor.configure(leftShooterConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        rightShooterMotor.configure(rightShooterConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
     // one Neo 550
     private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
@@ -71,7 +81,7 @@ public class Shooter extends SubsystemBase {
     }
 
     private double getAxleVelocity() {
-        return leftShooterMotor.getEncoder().getVelocity() / 60.0;
+        return leftShooterMotor.getEncoder().getVelocity();
     }
 
     public class AdjustHood extends Command {
