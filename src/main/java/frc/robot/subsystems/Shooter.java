@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.MathSharedStore;
@@ -13,7 +16,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.EncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class Shooter extends SubsystemBase {
@@ -26,17 +28,8 @@ public class Shooter extends SubsystemBase {
     private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
     private final SparkMax rightShooterMotor = new SparkMax(ShooterConstants.kRightShooterMotorId, MotorType.kBrushless);
     {
-        // rpm to rps
-        double velocityConversionFactor = 1.0 / 60.0;
-
-        SparkMaxConfig leftShooterConfig = new SparkMaxConfig();
-        leftShooterConfig.inverted(false).apply(new EncoderConfig().velocityConversionFactor(velocityConversionFactor));
-        
-        SparkMaxConfig rightShooterConfig = new SparkMaxConfig();
-        rightShooterConfig.inverted(true).apply(new EncoderConfig().velocityConversionFactor(velocityConversionFactor));
-
-        leftShooterMotor.configure(leftShooterConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        rightShooterMotor.configure(rightShooterConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        leftShooterMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
     // one Neo 550
     private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
@@ -53,8 +46,7 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         // motors should be at the same velocity because they are connected to the same axle
-        // convert rpm to rps
-        double axleVelocity = getAxleVelocity();
+        double axleVelocity = getAxleVelocityInRotationsPerSecond();
         double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
         //System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
         leftShooterMotor.setVoltage(motorVoltage);
@@ -62,7 +54,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocity());
+        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocityInRotationsPerSecond());
         //System.out.println(speed);
         ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
@@ -80,8 +72,8 @@ public class Shooter extends SubsystemBase {
         return ShooterConstants.kShooterProfiledPIDController.atGoal();
     }
 
-    private double getAxleVelocity() {
-        return leftShooterMotor.getEncoder().getVelocity();
+    private double getAxleVelocityInRotationsPerSecond() {
+        return RotationsPerSecond.convertFrom(leftShooterMotor.getEncoder().getVelocity(), RPM);
     }
 
     public class AdjustHood extends Command {
