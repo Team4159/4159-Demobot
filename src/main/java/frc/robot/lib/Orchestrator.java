@@ -13,36 +13,26 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Orchestrator extends Command {
 
-    private enum CommandBlockStatus {
+    private enum RunBlockStatus {
         CONTINUE, JUMP, YIELD, EXIT
     }
 
     @FunctionalInterface
-    private interface CommandBlockCallback {
-        CommandBlockStatus run();
+    private interface RunBlockCallback {
+        RunBlockStatus run();
     }
 
-    private class CommandBlock {
-        private CommandBlockCallback callback;
-
-        public CommandBlock(CommandBlockCallback callback) {
-            this.callback = callback;
-        }
-
-        public CommandBlockStatus run() {
-            return callback.run();
-        }
+    private record RunBlock(RunBlockCallback callback) {
     }
 
-    private class RepeatStack extends Orchestrator {
-
+    private record RunStack(Command command, boolean repeating) {
     }
 
-    private final ArrayList<CommandBlock> blocks = new ArrayList<>();
+    private final ArrayList<RunBlock> blocks = new ArrayList<>();
 
-    private final ArrayList<Command> stacks = new ArrayList<>();
-    private final ArrayList<Command> untrackedStacks = new ArrayList<>();
-    private final Map<String, ArrayList<Command>> trackedStacks = new HashMap<>();
+    private final ArrayList<RunStack> stacks = new ArrayList<>();
+    private final ArrayList<RunStack> untrackedStacks = new ArrayList<>();
+    private final Map<String, ArrayList<RunStack>> trackedStacks = new HashMap<>();
 
     private final Map<String, Integer> labels = new HashMap<>();
 
@@ -69,20 +59,18 @@ public class Orchestrator extends Command {
 
     @Override
     public void execute() {
-        if (runFinished) {
-            return;
-        }
-
         boolean stacksRunFinished = true;
-        for (Command stack : stacks) {
-            if (stack instanceof RepeatStack) {
-                if (stack.isFinished()) {
-                    stack.initialize();
+        for (RunStack stack : stacks) {
+            Command command = stack.command;
+            if (stack.repeating) {
+                if (command.isFinished()) {
+                    command.initialize();
                 }
-                stack.execute();
+                command.execute();
             } else {
-                if (!stack.isFinished()) {
-                    stack.execute();
+                if (!command.isFinished()) {
+                    command.execute();
+                    stacksRunFinished = false;
                 }
             }
         }
@@ -92,15 +80,15 @@ public class Orchestrator extends Command {
                 lastBlockInitializedSeconds = getTime();
             }
             lastRunIndex = runIndex;
-            CommandBlock commandBlock = blocks.get(runIndex);
-            CommandBlockStatus status = commandBlock.run();
-            if (status == CommandBlockStatus.CONTINUE) {
+            RunBlock commandBlock = blocks.get(runIndex);
+            RunBlockStatus status = commandBlock.callback.run();
+            if (status == RunBlockStatus.CONTINUE) {
                 runIndex++;
-            } else if (status == CommandBlockStatus.JUMP) {
+            } else if (status == RunBlockStatus.JUMP) {
                 // do nothing
-            } else if (status == CommandBlockStatus.YIELD) {
+            } else if (status == RunBlockStatus.YIELD) {
                 break;
-            } else if (status == CommandBlockStatus.EXIT) {
+            } else if (status == RunBlockStatus.EXIT) {
                 runFinished = true;
                 break;
             } else {
@@ -108,8 +96,8 @@ public class Orchestrator extends Command {
             }
         }
 
-        for (Command stack : stacks) {
-            if (!stack.isFinished()) {
+        for (RunStack stack : stacks) {
+            if (!stack.command.isFinished()) {
                 stacksRunFinished = false;
                 break;
             }
@@ -130,9 +118,11 @@ public class Orchestrator extends Command {
         if (exitCallback != null) {
             exitCallback.accept(interrupted);
         }
-        for (Command stack : stacks) {
-            if (stack instanceof RepeatStack || !stack.isFinished()) {
-                stack.end(true);
+        for (RunStack stack : stacks) {
+            if (stack.repeating) {
+                stack.command.end(true);
+            } else {
+                cancelStack(stack);
             }
         }
         stacks.clear();
@@ -147,16 +137,16 @@ public class Orchestrator extends Command {
     }
 
     public Orchestrator exit() {
-        addBlock(() -> CommandBlockStatus.EXIT);
+        addBlock(() -> RunBlockStatus.EXIT);
         return this;
     }
 
     public Orchestrator exitif(BooleanSupplier condition) {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
-                return CommandBlockStatus.EXIT;
+                return RunBlockStatus.EXIT;
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -170,7 +160,7 @@ public class Orchestrator extends Command {
         if (labels.containsKey(name)) {
             throw new IllegalArgumentException("Label already exists: " + name);
         }
-        addBlock(() -> CommandBlockStatus.CONTINUE);
+        addBlock(() -> RunBlockStatus.CONTINUE);
         addLabel(name, blocks.size() - 1);
         return this;
     }
@@ -178,7 +168,7 @@ public class Orchestrator extends Command {
     public Orchestrator jump(String label) {
         addBlock(() -> {
             runIndex = labels.get(label);
-            return CommandBlockStatus.JUMP;
+            return RunBlockStatus.JUMP;
         });
         return this;
     }
@@ -194,7 +184,7 @@ public class Orchestrator extends Command {
                     runIndex = labels.get(falseLabel);
                 }
             }
-            return CommandBlockStatus.JUMP;
+            return RunBlockStatus.JUMP;
         });
         return this;
     }
@@ -206,7 +196,7 @@ public class Orchestrator extends Command {
     public Orchestrator run(Runnable callback) {
         addBlock(() -> {
             callback.run();
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -222,7 +212,7 @@ public class Orchestrator extends Command {
                     falseCallback.run();
                 }
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -233,8 +223,8 @@ public class Orchestrator extends Command {
 
     public Orchestrator repeat(String group, Runnable callback) {
         addBlock(() -> {
-            repeatRun(group, callback);
-            return CommandBlockStatus.CONTINUE;
+            runRepeatBlock(group, callback);
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -248,14 +238,14 @@ public class Orchestrator extends Command {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueCallback != null) {
-                    repeatRun(trueGroup, trueCallback);
+                    runRepeatBlock(trueGroup, trueCallback);
                 }
             } else {
                 if (falseCallback != null) {
-                    repeatRun(falseGroup, falseCallback);
+                    runRepeatBlock(falseGroup, falseCallback);
                 }
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -272,51 +262,10 @@ public class Orchestrator extends Command {
         return repeatif(condition, null, trueCallback, null, falseCallback);
     }
 
-    public Orchestrator fastrepeat(String group, Runnable callback) {
-        addBlock(() -> {
-            fastrepeatRun(group, callback);
-            return CommandBlockStatus.CONTINUE;
-        });
-        return this;
-    }
-
-    public Orchestrator fastrepeat(Runnable callback) {
-        return fastrepeat(null, callback);
-    }
-
-    public Orchestrator fastrepeatif(BooleanSupplier condition, String trueGroup, Runnable trueCallback,
-            String falseGroup, Runnable falseCallback) {
-        addBlock(() -> {
-            if (condition.getAsBoolean()) {
-                if (trueCallback != null) {
-                    fastrepeatRun(trueGroup, trueCallback);
-                }
-            } else {
-                if (falseCallback != null) {
-                    fastrepeatRun(falseGroup, falseCallback);
-                }
-            }
-            return CommandBlockStatus.CONTINUE;
-        });
-        return this;
-    }
-
-    public Orchestrator fastrepeatif(BooleanSupplier condition, String trueGroup, Runnable trueCallback) {
-        return fastrepeatif(condition, trueGroup, trueCallback, null, null);
-    }
-
-    public Orchestrator fastrepeatif(BooleanSupplier condition, Runnable trueCallback) {
-        return fastrepeatif(condition, null, trueCallback, null, null);
-    }
-
-    public Orchestrator fastrepeatif(BooleanSupplier condition, Runnable trueCallback, Runnable falseCallback) {
-        return fastrepeatif(condition, null, trueCallback, null, falseCallback);
-    }
-
     public Orchestrator command(String group, Command command) {
         addBlock(() -> {
-            commandRun(group, command);
-            return CommandBlockStatus.CONTINUE;
+            runCommandBlock(group, command);
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -330,14 +279,14 @@ public class Orchestrator extends Command {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueCommand != null) {
-                    commandRun(trueGroup, trueCommand);
+                    runCommandBlock(trueGroup, trueCommand);
                 }
             } else {
                 if (falseCommand != null) {
-                    commandRun(falseGroup, falseCommand);
+                    runCommandBlock(falseGroup, falseCommand);
                 }
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -357,19 +306,19 @@ public class Orchestrator extends Command {
     public Orchestrator yield(double timeoutSeconds, BooleanSupplier condition) {
         addBlock(() -> {
             if (!condition.getAsBoolean() && getTime() - lastBlockInitializedSeconds <= timeoutSeconds) {
-                return CommandBlockStatus.YIELD;
+                return RunBlockStatus.YIELD;
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
 
-    public Orchestrator yield(double seconds) {
+    public Orchestrator yield(double timeoutSeconds) {
         addBlock(() -> {
-            if (getTime() - lastBlockInitializedSeconds <= seconds) {
-                return CommandBlockStatus.YIELD;
+            if (getTime() - lastBlockInitializedSeconds <= timeoutSeconds) {
+                return RunBlockStatus.YIELD;
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -377,9 +326,9 @@ public class Orchestrator extends Command {
     public Orchestrator yield(BooleanSupplier condition) {
         addBlock(() -> {
             if (!condition.getAsBoolean()) {
-                return CommandBlockStatus.YIELD;
+                return RunBlockStatus.YIELD;
             }
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -389,40 +338,40 @@ public class Orchestrator extends Command {
             if (!trackedStacks.containsKey(group)) {
                 // throw new IllegalAccessError("Unable to cancel stack group: " + group + "
                 // because it does not exist");
-                return CommandBlockStatus.CONTINUE;
+                return RunBlockStatus.CONTINUE;
             }
-            ArrayList<Command> stackGroup = trackedStacks.get(group);
-            for (Command stack : stackGroup) {
-                stack.cancel();
+            var stackGroup = trackedStacks.get(group);
+            for (RunStack stack : stackGroup) {
+                cancelStack(stack);
                 stacks.remove(stack);
             }
             trackedStacks.remove(group);
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
 
     public Orchestrator cancelAllStacks() {
         addBlock(() -> {
-            for (Command stack : stacks) {
-                stack.cancel();
+            for (RunStack stack : stacks) {
+                cancelStack(stack);
             }
             stacks.clear();
             untrackedStacks.clear();
             trackedStacks.clear();
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
 
     public Orchestrator cancelAllUntrackedStacks() {
         addBlock(() -> {
-            for (Command stack : untrackedStacks) {
-                stack.cancel();
+            for (RunStack stack : untrackedStacks) {
+                cancelStack(stack);
                 stacks.remove(stack);
             }
             untrackedStacks.clear();
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -430,13 +379,13 @@ public class Orchestrator extends Command {
     public Orchestrator cancelAllTrackedStacks() {
         addBlock(() -> {
             trackedStacks.forEach((group, stackGroup) -> {
-                for (Command stack : stackGroup) {
-                    stack.cancel();
+                for (RunStack stack : stackGroup) {
+                    cancelStack(stack);
                     stacks.remove(stack);
                 }
             });
             trackedStacks.clear();
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -444,7 +393,7 @@ public class Orchestrator extends Command {
     public Orchestrator print(String text) {
         addBlock(() -> {
             System.out.println(text);
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -452,48 +401,52 @@ public class Orchestrator extends Command {
     public Orchestrator print(Supplier<String> supplier) {
         addBlock(() -> {
             System.out.println(supplier.get());
-            return CommandBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
 
-    private void addBlock(CommandBlockCallback callback) {
-        blocks.add(new CommandBlock(callback));
+    private void addBlock(RunBlockCallback callback) {
+        blocks.add(new RunBlock(callback));
     }
 
-    private Command addStack(String group, Command stack) {
-        stack.initialize();
+    private RunStack addStack(String group, Command command, boolean repeating) {
+        command.initialize();
+        RunStack stack = new RunStack(command, repeating);
         stacks.add(stack);
         if (group == null) {
             untrackedStacks.add(stack);
         } else {
             if (!trackedStacks.containsKey(group)) {
-                trackedStacks.put(group, new ArrayList<Command>());
+                trackedStacks.put(group, new ArrayList<>());
             }
-            ArrayList<Command> stackGroup = trackedStacks.get(group);
+            var stackGroup = trackedStacks.get(group);
             stackGroup.add(stack);
         }
         return stack;
     }
 
-    private void repeatRun(String group, Runnable callback) {
-        RepeatStack stack = (RepeatStack) addStack(group, new RepeatStack());
-        stack.run(callback::run);
-    }
-
-    private void fastrepeatRun(String group, Runnable callback) {
-        RepeatStack stack = (RepeatStack) addStack(group, new Orchestrator());
+    private void runRepeatBlock(String group, Runnable callback) {
+        Orchestrator command = new Orchestrator();
+        command.run(callback::run);
+        addStack(group, command, true);
         callback.run();
-        stack.run(callback::run);
     }
 
-    private void commandRun(String group, Command command) {
-        addStack(group, command);
+    private void runCommandBlock(String group, Command command) {
+        addStack(group, command, false);
         command.getRequirements().clear();
     }
 
     private void addLabel(String name, int destination) {
         labels.put(name, destination);
+    }
+
+    private void cancelStack(RunStack stack) {
+        if (stack.command.isFinished()) {
+            return;
+        }
+        stack.command.end(true);
     }
 
     private double getTime() {
