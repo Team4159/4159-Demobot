@@ -17,12 +17,7 @@ public class Orchestrator extends Command {
         CONTINUE, JUMP, YIELD, EXIT
     }
 
-    @FunctionalInterface
-    private interface RunBlockCallback {
-        RunBlockStatus run();
-    }
-
-    private record RunBlock(RunBlockCallback callback) {
+    private record RunBlock(Supplier<RunBlockStatus> callback) {
     }
 
     private record RunStack(Command command, boolean repeating) {
@@ -81,7 +76,7 @@ public class Orchestrator extends Command {
             }
             lastRunIndex = runIndex;
             RunBlock commandBlock = blocks.get(runIndex);
-            RunBlockStatus status = commandBlock.callback.run();
+            RunBlockStatus status = commandBlock.callback.get();
             if (status == RunBlockStatus.CONTINUE) {
                 runIndex++;
             } else if (status == RunBlockStatus.JUMP) {
@@ -406,7 +401,7 @@ public class Orchestrator extends Command {
         return this;
     }
 
-    private void addBlock(RunBlockCallback callback) {
+    private void addBlock(Supplier<RunBlockStatus> callback) {
         blocks.add(new RunBlock(callback));
     }
 
