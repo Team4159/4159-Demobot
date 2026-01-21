@@ -87,7 +87,7 @@ public class Orchestrator extends Command {
                 runFinished = true;
                 break;
             } else {
-                throw new IllegalStateException("Invalid CommandBlockStatus");
+                throw new IllegalStateException("Invalid RunBlockStatus");
             }
         }
 
