@@ -78,7 +78,7 @@ public class Turret extends SubsystemBase {
             double inputY = controller.getRightY();
             double magnitude = Math.hypot(inputX, inputY);
 
-            if (magnitude > TurretConstants.kInputDeadzone) {
+            if (magnitude >= TurretConstants.kInputDeadzone) {
                 double angle = Math.atan2(inputY, inputX);
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
@@ -107,13 +107,12 @@ public class Turret extends SubsystemBase {
                 previousWantedTurretSetpoint = wantedTurretSetpoint;
             }
 
-            // invert since SparkMax.setVoltage() is agnostic to inverse
-            double motorSetpoint = -turretSetpoint * TurretConstants.kTurretMotorGearRatio;
+            double motorSetpoint = turretSetpoint * TurretConstants.kTurretMotorGearRatio;
             double pidVoltage = TurretConstants.kTurretProfiledPIDController
                     .calculate(turretMotor.getEncoder().getPosition(), motorSetpoint);
             double feedforwardVoltage = TurretConstants.kTurretFeedforward
                     .calculate(TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity);
-            turretMotor.setVoltage(pidVoltage + feedforwardVoltage);
+            turretMotor.set((pidVoltage + feedforwardVoltage) / 12.0);
         }
     }
 }

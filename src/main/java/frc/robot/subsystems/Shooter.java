@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -32,9 +31,9 @@ public class Shooter extends SubsystemBase {
         rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
     // one Neo 550
-    private final SparkMax hoodAdjuster = new SparkMax(ShooterConstants.kHoodAdjusterMotorId, MotorType.kBrushless);
+    private final SparkMax hoodMotor = new SparkMax(ShooterConstants.kHoodMotorId, MotorType.kBrushless);
     {
-        hoodAdjuster.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        hoodMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     private double hoodAngle = 0;
@@ -51,6 +50,10 @@ public class Shooter extends SubsystemBase {
         //System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
         leftShooterMotor.setVoltage(motorVoltage);
         rightShooterMotor.setVoltage(motorVoltage);
+
+        // hood voltage discrepancies due to battery sag aren't critical, so .set() is preferred
+        double hoodVoltage = ShooterConstants.kHoodProfiledPIDController.calculate(hoodMotor.getEncoder().getPosition());
+        hoodMotor.set(hoodVoltage / 12.0);
     }
 
     public void setSpeed(double speed) {
@@ -60,13 +63,14 @@ public class Shooter extends SubsystemBase {
     }
 
     public void adjustHood(double angle) {
-        hoodAngle = ShooterConstants.kHoodGearRatio * angle + ShooterConstants.kHoodAngleOffset;
+        hoodAngle = angle * ShooterConstants.kHoodGearRatio + ShooterConstants.kHoodAngleOffset;
         //System.out.println(hoodAngle);
-        hoodAdjuster.getClosedLoopController().setReference(hoodAngle, ControlType.kPosition);
+        ShooterConstants.kHoodProfiledPIDController.setGoal(hoodAngle);
     }
 
     public boolean isShooterReady() {
         if (ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <= 0) {
+            // must be spinning in the positive direction to be shooting
             return false;
         }
         return ShooterConstants.kShooterProfiledPIDController.atGoal();
@@ -80,15 +84,12 @@ public class Shooter extends SubsystemBase {
         private double angleDifferentialSpeed;
         private double previousTime;
 
-        // put joystick as parameter into command
-        // run conversion that converts -1 to 1 range into range for angles
         public AdjustHood(double angleDifferentialSpeed) {
             this.angleDifferentialSpeed = angleDifferentialSpeed;
             addRequirements(Shooter.this);
         }
 
-        public double throttleToAngle(double deltaTime) {
-            // convert throttle to angle
+        public double getAdjustment(double deltaTime) {
             return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * deltaTime, ShooterConstants.kHoodAngleMinimum, ShooterConstants.kHoodAngleMaximum);
         }
 
@@ -100,7 +101,8 @@ public class Shooter extends SubsystemBase {
         // execute command (over and over running) call set function to correspond
         @Override
         public void execute() {
-            Shooter.this.adjustHood(throttleToAngle(MathSharedStore.getTimestamp() - previousTime));
+            double deltaTime = MathSharedStore.getTimestamp() - previousTime;
+            Shooter.this.adjustHood(getAdjustment(deltaTime));
             previousTime = MathSharedStore.getTimestamp();
         }
     } // end change hood command

@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
 import edu.wpi.first.math.util.Units;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -52,7 +53,7 @@ public final class Constants {
       IDLE(0), INTAKE(0.5), OUTTAKE(-0.15);
 
       public final double speed;
-      
+
       private FeederState(double speed) {
         this.speed = speed;
       }
@@ -70,11 +71,13 @@ public final class Constants {
     public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
     public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
-    {
-      kTurretMotorConfig.idleMode(IdleMode.kCoast);
-      // kTurretMotorConfig.softLimit
-      //     .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum * kTurretMotorGearRatio)
-      //     .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
+    static {
+      kTurretMotorConfig.idleMode(IdleMode.kCoast).inverted(true);
+      kTurretMotorConfig.softLimit
+      .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum *
+      kTurretMotorGearRatio)
+      .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum *
+      kTurretMotorGearRatio);
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
@@ -94,39 +97,47 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    //IDs for all motors
+    // IDs for all motors
     public static final int kLeftShooterMotorId = 6;
     public static final int kRightShooterMotorId = 5;
-    public static final int kHoodAdjusterMotorId = 7;
+    public static final int kHoodMotorId = 7;
 
     // pid
+    public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig)new SparkMaxConfig().inverted(false);
+    public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig)new SparkMaxConfig().inverted(true);
     public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
         0.25, 0, 0,
         new TrapezoidProfile.Constraints(60, 60));
-    {
-      kShooterProfiledPIDController.setTolerance(kSpinTolerance);
+    static {
+      kShooterProfiledPIDController.setTolerance(ShooterConstants.kSpinTolerance);
     }
-    
+
     // hood angle ranges
+    public static final SparkMaxConfig kHoodMotorConfig = (SparkMaxConfig)new SparkMaxConfig().inverted(false);
     public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
     public static final double kHoodAngleMaximum = Units.degreesToRotations(60);
     public static final double kHoodAngleOffset = Units.degreesToRotations(0);
     public static final double kHoodGearRatio = 25.0; // does not affect offset
     public static final double kHoodAdjustSpeed = 0.03;
+    public static final ProfiledPIDController kHoodProfiledPIDController = new ProfiledPIDController(
+        0.2, 0, 0,
+        new TrapezoidProfile.Constraints(100, 250));
 
-    //----- tolerances: so if the motors/whatnot are a bit off, it'll still work------
+    // ----- tolerances: so if the motors/whatnot are a bit off, it'll still
+    // work------
     // pitch refers to the angle
     public static final double kPitchTolerance = Units.degreesToRotations(5);
-    // used the value for spinTolerance from FRC-2024 
+    // used the value for spinTolerance from FRC-2024
     public static final double kSpinTolerance = 5;
 
-    // minimum and maximums for each.. because there are so many diff positions the shooter could be in. More
+    // minimum and maximums for each.. because there are so many diff positions the
+    // shooter could be in. More
     // efficient to have a range instead of set states
     // REPLACE the values below with actual mins and maxes later (after testing).
     public static final double kMinPitch = Units.degreesToRadians(14);
     public static final double kMaxPitch = Units.rotationsToRadians(0.2);
 
-    // ENUMS 
+    // ENUMS
     public static enum ShooterState {
       IDLE(0), SHOOT(80), REVERSE(-10);
 
