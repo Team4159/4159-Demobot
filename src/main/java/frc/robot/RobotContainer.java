@@ -4,15 +4,15 @@
 
 package frc.robot;
 
+import frc.lib.FluentTrigger;
+import frc.lib.HIDRumble;
+import frc.lib.Orchestrator;
+import frc.lib.HIDRumble.RumbleRequest;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
-import frc.robot.lib.FluentTrigger;
-import frc.robot.lib.HIDRumble;
-import frc.robot.lib.HIDRumble.RumbleRequest;
-import frc.robot.lib.Orchestrator;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
 import frc.robot.subsystems.Feeder;

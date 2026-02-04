@@ -11,11 +11,11 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.HIDRumble;
+import frc.lib.HIDRumble.RumbleRequest;
 import frc.robot.Constants;
 import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.lib.HIDRumble;
-import frc.robot.lib.HIDRumble.RumbleRequest;
 
 public class Turret extends SubsystemBase {
     private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretMotorId, MotorType.kBrushless);
