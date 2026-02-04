@@ -5,11 +5,10 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.revrobotics.spark.SparkMax;
 
-import edu.wpi.first.math.MathSharedStore;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.ShooterConstants.HoodState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -25,47 +24,56 @@ public class Shooter extends SubsystemBase {
      */
     // two Neos
     private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
-    private final SparkMax rightShooterMotor = new SparkMax(ShooterConstants.kRightShooterMotorId, MotorType.kBrushless);
+    private final SparkMax rightShooterMotor = new SparkMax(ShooterConstants.kRightShooterMotorId,
+            MotorType.kBrushless);
     {
-        leftShooterMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        leftShooterMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters,
+                PersistMode.kNoPersistParameters);
+        rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters,
+                PersistMode.kNoPersistParameters);
     }
     // one Neo 550
     private final SparkMax hoodMotor = new SparkMax(ShooterConstants.kHoodMotorId, MotorType.kBrushless);
     {
-        hoodMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        hoodMotor.configure(ShooterConstants.kHoodMotorConfig, ResetMode.kNoResetSafeParameters,
+                PersistMode.kNoPersistParameters);
     }
 
-    private double hoodAngle = 0;
-
     public Shooter() {
-        adjustHood(hoodAngle);
+        adjustHood(HoodState.IDLE.speed);
     }
 
     @Override
     public void periodic() {
-        // motors should be at the same velocity because they are connected to the same axle
+        // motors should be at the same velocity because they are connected to the same
+        // axle
         double axleVelocity = getAxleVelocityInRotationsPerSecond();
         double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
-        //System.out.println("axlevelocity: " +  axleVelocity + " motorVoltage: " + motorVoltage + " speed: " + ShooterConstants.kShooterPIDController.getGoal().position);
+        // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
+        // motorVoltage + " speed: " +
+        // ShooterConstants.kShooterPIDController.getGoal().position);
         leftShooterMotor.setVoltage(motorVoltage);
         rightShooterMotor.setVoltage(motorVoltage);
-
-        // hood voltage discrepancies due to battery sag aren't critical, so .set() is preferred
-        double hoodVoltage = ShooterConstants.kHoodProfiledPIDController.calculate(hoodMotor.getEncoder().getPosition());
-        hoodMotor.set(hoodVoltage / 12.0);
     }
 
     public void setSpeed(double speed) {
         ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocityInRotationsPerSecond());
-        //System.out.println(speed);
+        // System.out.println(speed);
         ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
 
-    public void adjustHood(double angle) {
-        hoodAngle = angle * ShooterConstants.kHoodGearRatio + ShooterConstants.kHoodAngleOffset;
-        //System.out.println(hoodAngle);
-        ShooterConstants.kHoodProfiledPIDController.setGoal(hoodAngle);
+    public void adjustHood(double speed) {
+        hoodMotor.set(speed);
+    }
+
+    public void zeroHood() {
+        hoodMotor.getEncoder().setPosition(0.0);
+    }
+
+    public void enableHoodReverseSoftLimit(boolean enabled) {
+        var reverseConfig = new SparkMaxConfig();
+        reverseConfig.softLimit.reverseSoftLimitEnabled(enabled);
+        hoodMotor.configure(reverseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public boolean isShooterReady() {
@@ -81,29 +89,21 @@ public class Shooter extends SubsystemBase {
     }
 
     public class AdjustHood extends Command {
-        private double angleDifferentialSpeed;
-        private double previousTime;
+        private final HoodState state;
 
-        public AdjustHood(double angleDifferentialSpeed) {
-            this.angleDifferentialSpeed = angleDifferentialSpeed;
+        public AdjustHood(HoodState state) {
+            this.state = state;
             addRequirements(Shooter.this);
         }
 
-        public double getAdjustment(double deltaTime) {
-            return MathUtil.clamp(hoodAngle + angleDifferentialSpeed * deltaTime, ShooterConstants.kHoodAngleMinimum, ShooterConstants.kHoodAngleMaximum);
-        }
-
-        @Override
-        public void initialize() {
-            previousTime = MathSharedStore.getTimestamp();
-        }
-
-        // execute command (over and over running) call set function to correspond
         @Override
         public void execute() {
-            double deltaTime = MathSharedStore.getTimestamp() - previousTime;
-            Shooter.this.adjustHood(getAdjustment(deltaTime));
-            previousTime = MathSharedStore.getTimestamp();
+            adjustHood(state.speed);
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            adjustHood(HoodState.IDLE.speed);
         }
     } // end change hood command
 

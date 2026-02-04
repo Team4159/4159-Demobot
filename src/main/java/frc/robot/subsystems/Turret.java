@@ -54,11 +54,16 @@ public class Turret extends SubsystemBase {
             double magnitude = Math.hypot(inputX, inputY);
 
             if (magnitude >= TurretConstants.kInputDeadzone) {
-                double angle = Math.atan2(inputY, inputX);
+                double inputAngle = Math.atan2(inputY, inputX);
+                double lastInputAngle = turretSetpoint / TurretConstants.kInputAngleScalar;
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
-                double wantedTurretSetpoint = Units.radiansToRotations(TurretConstants.kAngleScalar
-                        * (((angle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
+                double desiredAngle = Math
+                        .abs(inputAngle - lastInputAngle) >= TurretConstants.kInputAngleInputMinimumChange
+                                ? inputAngle
+                                : lastInputAngle;
+                double wantedTurretSetpoint = Units.radiansToRotations(TurretConstants.kInputAngleScalar
+                        * (((desiredAngle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
                                 % Units.degreesToRadians(360))
                                 - Units.degreesToRadians(180)));
                 boolean turretSetpointWithinRange = wantedTurretSetpoint >= TurretConstants.kTurretAngleMinimum
@@ -90,7 +95,7 @@ public class Turret extends SubsystemBase {
             turretMotor.set((pidVoltage + feedforwardVoltage) / 12.0);
         }
 
-        public void zeroTurretMotor() {
+        public void zeroTurret() {
             turretSetpoint = 0;
             TurretConstants.kTurretProfiledPIDController.reset(0);
             turretMotor.getEncoder().setPosition(0);

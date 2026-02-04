@@ -10,8 +10,8 @@ import frc.lib.Orchestrator;
 import frc.lib.HIDRumble.RumbleRequest;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RumbleConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
+import frc.robot.Constants.ShooterConstants.HoodState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
@@ -47,11 +47,13 @@ public class RobotContainer {
   private final ArcadeDrive drive = drivetrain.new ArcadeDrive(driverController);
   private final TurretPositionControl turnTurret = turret.new TurretPositionControl(driverController);
 
-  private final Trigger shootTrigger = driverController.leftTrigger();
+  private final Trigger shootTrigger = driverController.leftBumper();
+  private final Trigger intakeTrigger = driverController.leftTrigger();
   private final Trigger outtakeTrigger = driverController.a();
   private final Trigger hoodUpTrigger = driverController.rightBumper();
   private final Trigger hoodDownTrigger = driverController.rightTrigger();
   private final Trigger turretZeroTrigger = driverController.b();
+  private final Trigger hoodZeroTrigger = driverController.y();
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -79,20 +81,36 @@ public class RobotContainer {
    */
   private void configureBindings() {
     new FluentTrigger()
-        .bind(hoodUpTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed))
-        .bind(hoodDownTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed));
+        .bind(hoodUpTrigger, shooter.new AdjustHood(HoodState.UP))
+        .bind(hoodDownTrigger, shooter.new AdjustHood(HoodState.DOWN));
     new FluentTrigger()
         .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
         .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
         .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
     new FluentTrigger()
         .setDefault(feeder.new ChangeState(FeederState.IDLE))
-        .bind(shootTrigger,
-            new Orchestrator().require(feeder).yield(5, shooter::isShooterReady)
+        .bind(intakeTrigger,
+            new Orchestrator().require(feeder).yield(shooter::isShooterReady)
                 .command(feeder.new ChangeState(FeederState.INTAKE)))
         .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
-    turretZeroTrigger.whileTrue(new Orchestrator().yield(3).run(turnTurret::zeroTurretMotor).run(() -> HIDRumble
-        .rumble(driverController, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 1, 0.15))));
+    turretZeroTrigger.whileTrue(new Orchestrator()
+        .yield(3)
+        .run(turnTurret::zeroTurret).run(() -> HIDRumble.rumble(driverController,
+            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 2, 0.15))));
+    hoodZeroTrigger.whileTrue(new Orchestrator()
+        .yield(3)
+        .require(shooter)
+        .command(shooter.new AdjustHood(HoodState.DOWN_SLOW))
+        .run(() -> {
+          shooter.enableHoodReverseSoftLimit(false);
+          HIDRumble.rumble(driverController,
+              new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 2, 0.15));
+        })
+        .repeat(() -> HIDRumble.rumble(driverController,
+            new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kHoodZeroStrength, 2)))
+        .onexit((interrupted) -> shooter.enableHoodReverseSoftLimit(true))
+        .yield(5)
+        .exit());
   }
 
   /**

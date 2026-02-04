@@ -64,7 +64,8 @@ public final class Constants {
     public static final int kTurretMotorId = 9;
 
     public static final double kInputDeadzone = 0.75;
-    public static final double kAngleScalar = 0.5;
+    public static final double kInputAngleScalar = 0.5;
+    public static final double kInputAngleInputMinimumChange = Units.degreesToRadians(5);
 
     public static final double kTurretMotorGearRatio = 54.0;
 
@@ -81,7 +82,7 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        0.4, 0.0, 0.01,
+        0.4, 0.0, 0.02,
         new TrapezoidProfile.Constraints(30, 150));
     public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.05, 0.1, 0);
   }
@@ -96,23 +97,34 @@ public final class Constants {
     public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(false);
     public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(true);
     public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
-        0.25, 0, 0,
+        0.3, 0, 0,
         new TrapezoidProfile.Constraints(60, 60));
     static {
       kShooterProfiledPIDController.setTolerance(ShooterConstants.kSpinTolerance);
     }
 
     // hood angle ranges
-    public static final SparkMaxConfig kHoodMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(false);
     public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
     public static final double kHoodAngleMaximum = Units.degreesToRotations(60);
-    public static final double kHoodAngleOffset = Units.degreesToRotations(0);
     public static final double kHoodGearRatio = 25.0; // does not affect offset
-    public static final double kHoodAdjustSpeed = 0.03;
-    public static final ProfiledPIDController kHoodProfiledPIDController = new ProfiledPIDController(
-        0.2, 0, 0,
-        new TrapezoidProfile.Constraints(100, 250));
+    public static final SparkMaxConfig kHoodMotorConfig = new SparkMaxConfig();
+    static {
+      kHoodMotorConfig.inverted(false);
+      kHoodMotorConfig.softLimit
+          .forwardSoftLimitEnabled(true).forwardSoftLimit(kHoodAngleMaximum *
+              kHoodGearRatio)
+          .reverseSoftLimitEnabled(true).reverseSoftLimit(kHoodAngleMinimum *
+              kHoodGearRatio);
+    }
+    public static enum HoodState {
+      IDLE(0.0), UP(0.5), DOWN(-0.5), DOWN_SLOW(-0.25);
 
+      public final double speed;
+
+      private HoodState(double speed) {
+        this.speed = speed;
+      }
+    }
     // ----- tolerances: so if the motors/whatnot are a bit off, it'll still
     // work------
     // pitch refers to the angle
@@ -129,7 +141,7 @@ public final class Constants {
 
     // ENUMS
     public static enum ShooterState {
-      IDLE(0), SHOOT(80), REVERSE(-20);
+      IDLE(0), SHOOT(100), REVERSE(-20);
 
       public final double speed;
 
@@ -143,5 +155,6 @@ public final class Constants {
     public static final double kTurretTurnStrength = 0.2;
     public static final double kTurretTripStrength = 0.2;
     public static final double kTurretZeroStrength = 0.5;
+    public static final double kHoodZeroStrength = 0.3;
   }
 }
