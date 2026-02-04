@@ -47,6 +47,7 @@ public class Orchestrator extends Command {
         runIndex = 0;
         lastRunIndex = 0;
         runFinished = false;
+        lastBlockInitializedSeconds = getTime();
         stacks.clear();
         untrackedStacks.clear();
         trackedStacks.clear();
@@ -303,7 +304,7 @@ public class Orchestrator extends Command {
             if (!condition.getAsBoolean() && getTime() - lastBlockInitializedSeconds <= timeoutSeconds) {
                 return RunBlockStatus.YIELD;
             }
-            return RunBlockStatus.CONTINUE;
+           return RunBlockStatus.CONTINUE;
         });
         return this;
     }

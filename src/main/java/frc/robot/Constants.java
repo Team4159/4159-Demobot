@@ -72,7 +72,7 @@ public final class Constants {
     public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
     public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
     static {
-      kTurretMotorConfig.idleMode(IdleMode.kCoast).inverted(true);
+      kTurretMotorConfig.idleMode(IdleMode.kBrake).inverted(true);
       kTurretMotorConfig.softLimit
       .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum *
       kTurretMotorGearRatio)
@@ -81,9 +81,9 @@ public final class Constants {
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
-        1, 0.0, 0.01,
-        new TrapezoidProfile.Constraints(50, 200));
-    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.5, 0, 0);
+        0.4, 0.0, 0.01,
+        new TrapezoidProfile.Constraints(30, 150));
+    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.1, 0.1, 0);
 
     public static enum TurretState {
       CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
@@ -139,7 +139,7 @@ public final class Constants {
 
     // ENUMS
     public static enum ShooterState {
-      IDLE(0), SHOOT(80), REVERSE(-10);
+      IDLE(0), SHOOT(80), REVERSE(-20);
 
       public final double speed;
 
@@ -150,7 +150,8 @@ public final class Constants {
   }
 
   public static class RumbleConstants {
-    public static final double kTurretTurnFeedbackValue = 0.2;
-    public static final double kTurretTripFeedbackValue = 0.2;
+    public static final double kTurretTurnStrength = 0.2;
+    public static final double kTurretTripStrength = 0.2;
+    public static final double kTurretZeroStrength = 0.5;
   }
 }

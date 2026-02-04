@@ -26,7 +26,6 @@ public class Turret extends SubsystemBase {
     }
 
     public Turret() {
-
     }
 
     private void setState(TurretState turretState) {
@@ -43,12 +42,12 @@ public class Turret extends SubsystemBase {
 
         @Override
         public void initialize() {
-            Turret.this.setState(turretState);
+            setState(turretState);
         }
 
         @Override
         public void end(boolean i) {
-            Turret.this.setState(TurretState.IDLE);
+            setState(TurretState.IDLE);
         }
     }
 
@@ -93,7 +92,7 @@ public class Turret extends SubsystemBase {
                 if (turretSetpointWithinRange) {
                     turretSetpoint = wantedTurretSetpoint;
                     HIDRumble.rumble(controller,
-                            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnFeedbackValue, 0));
+                            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnStrength, 0));
                 } else if (previousTurretSetpointWithinRange) {
                     if (previousWantedTurretSetpoint > 0) {
                         turretSetpoint = TurretConstants.kTurretAngleMaximum;
@@ -101,7 +100,7 @@ public class Turret extends SubsystemBase {
                         turretSetpoint = TurretConstants.kTurretAngleMinimum;
                     }
                     HIDRumble.rumble(controller,
-                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripFeedbackValue, 0, 0.3));
+                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0, 0.3));
                 }
                 previousTurretSetpointWithinRange = turretSetpointWithinRange;
                 previousWantedTurretSetpoint = wantedTurretSetpoint;
@@ -113,6 +112,13 @@ public class Turret extends SubsystemBase {
             double feedforwardVoltage = TurretConstants.kTurretFeedforward
                     .calculate(TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity);
             turretMotor.set((pidVoltage + feedforwardVoltage) / 12.0);
+        }
+
+        public void zeroTurretMotor() {
+            turretSetpoint = 0;
+            TurretConstants.kTurretProfiledPIDController.reset(0);
+            turretMotor.getEncoder().setPosition(0);
+            turretMotor.set(0);
         }
     }
 }

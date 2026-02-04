@@ -5,10 +5,13 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 import frc.robot.lib.FluentTrigger;
+import frc.robot.lib.HIDRumble;
+import frc.robot.lib.HIDRumble.RumbleRequest;
 import frc.robot.lib.Orchestrator;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Drivetrain.ArcadeDrive;
@@ -16,6 +19,7 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Turret.TurretPositionControl;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Shooter;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -46,7 +50,8 @@ public class RobotContainer {
   private final Trigger shootTrigger = driverController.leftTrigger();
   private final Trigger outtakeTrigger = driverController.a();
   private final Trigger hoodUpTrigger = driverController.rightBumper();
-  private final Trigger hoodDownTrigger = driverController.rightTrigger(); 
+  private final Trigger hoodDownTrigger = driverController.rightTrigger();
+  private final Trigger turretZeroTrigger = driverController.b();
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -74,16 +79,20 @@ public class RobotContainer {
    */
   private void configureBindings() {
     new FluentTrigger()
-    .bind(hoodUpTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed))
-    .bind(hoodDownTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed));
+        .bind(hoodUpTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed))
+        .bind(hoodDownTrigger, shooter.new AdjustHood(ShooterConstants.kHoodAdjustSpeed));
     new FluentTrigger()
-    .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
-    .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
-    .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
+        .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
+        .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
+        .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
     new FluentTrigger()
-      .setDefault(feeder.new ChangeState(FeederState.IDLE))
-      .bind(shootTrigger, new Orchestrator().require(feeder).yield(5, shooter::isShooterReady).command(feeder.new ChangeState(FeederState.INTAKE)))
-      .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
+        .setDefault(feeder.new ChangeState(FeederState.IDLE))
+        .bind(shootTrigger,
+            new Orchestrator().require(feeder).yield(5, shooter::isShooterReady)
+                .command(feeder.new ChangeState(FeederState.INTAKE)))
+        .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
+    turretZeroTrigger.whileTrue(new Orchestrator().yield(2.5).run(turnTurret::zeroTurretMotor).run(() -> HIDRumble
+        .rumble(driverController, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 1, 0.15))));
   }
 
   /**
