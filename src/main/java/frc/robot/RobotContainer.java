@@ -91,7 +91,7 @@ public class RobotContainer {
             new Orchestrator().require(feeder).yield(5, shooter::isShooterReady)
                 .command(feeder.new ChangeState(FeederState.INTAKE)))
         .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
-    turretZeroTrigger.whileTrue(new Orchestrator().yield(2.5).run(turnTurret::zeroTurretMotor).run(() -> HIDRumble
+    turretZeroTrigger.whileTrue(new Orchestrator().yield(3).run(turnTurret::zeroTurretMotor).run(() -> HIDRumble
         .rumble(driverController, new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 1, 0.15))));
   }
 
