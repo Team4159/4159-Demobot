@@ -74,26 +74,16 @@ public final class Constants {
     static {
       kTurretMotorConfig.idleMode(IdleMode.kBrake).inverted(true);
       kTurretMotorConfig.softLimit
-      .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum *
-      kTurretMotorGearRatio)
-      .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum *
-      kTurretMotorGearRatio);
+          .forwardSoftLimitEnabled(true).forwardSoftLimit(kTurretAngleMaximum *
+              kTurretMotorGearRatio)
+          .reverseSoftLimitEnabled(true).reverseSoftLimit(kTurretAngleMinimum *
+              kTurretMotorGearRatio);
     }
 
     public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
         0.4, 0.0, 0.01,
         new TrapezoidProfile.Constraints(30, 150));
-    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.1, 0.1, 0);
-
-    public static enum TurretState {
-      CLOCKWISE(0.1), COUNTERCLOCKWISE(-0.1), IDLE(0);
-
-      public final double speed;
-
-      private TurretState(double speed) {
-        this.speed = speed;
-      }
-    }
+    public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.05, 0.1, 0);
   }
 
   public static class ShooterConstants {
@@ -103,8 +93,8 @@ public final class Constants {
     public static final int kHoodMotorId = 7;
 
     // pid
-    public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig)new SparkMaxConfig().inverted(false);
-    public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig)new SparkMaxConfig().inverted(true);
+    public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(false);
+    public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(true);
     public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
         0.25, 0, 0,
         new TrapezoidProfile.Constraints(60, 60));
@@ -113,7 +103,7 @@ public final class Constants {
     }
 
     // hood angle ranges
-    public static final SparkMaxConfig kHoodMotorConfig = (SparkMaxConfig)new SparkMaxConfig().inverted(false);
+    public static final SparkMaxConfig kHoodMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(false);
     public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
     public static final double kHoodAngleMaximum = Units.degreesToRotations(60);
     public static final double kHoodAngleOffset = Units.degreesToRotations(0);

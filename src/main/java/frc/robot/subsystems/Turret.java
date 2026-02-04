@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.Constants.TurretConstants.TurretState;
 import frc.robot.lib.HIDRumble;
 import frc.robot.lib.HIDRumble.RumbleRequest;
 
@@ -26,29 +25,6 @@ public class Turret extends SubsystemBase {
     }
 
     public Turret() {
-    }
-
-    private void setState(TurretState turretState) {
-        turretMotor.set(turretState.speed);
-    }
-
-    public class TurnTurret extends Command {
-        private TurretState turretState;
-
-        public TurnTurret(TurretState turretState) {
-            this.turretState = turretState;
-            addRequirements(Turret.this);
-        }
-
-        @Override
-        public void initialize() {
-            setState(turretState);
-        }
-
-        @Override
-        public void end(boolean i) {
-            setState(TurretState.IDLE);
-        }
     }
 
     public class TurretPositionControl extends Command {
@@ -100,7 +76,7 @@ public class Turret extends SubsystemBase {
                         turretSetpoint = TurretConstants.kTurretAngleMinimum;
                     }
                     HIDRumble.rumble(controller,
-                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0, 0.3));
+                            new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0, 0.3));
                 }
                 previousTurretSetpointWithinRange = turretSetpointWithinRange;
                 previousWantedTurretSetpoint = wantedTurretSetpoint;
