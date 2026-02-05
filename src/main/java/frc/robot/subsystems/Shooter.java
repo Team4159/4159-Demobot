@@ -45,14 +45,13 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // motors should be at the same velocity because they are connected to the same
-        // axle
-        double axleVelocity = getAxleVelocityInRotationsPerSecond();
-        double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
         // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
         // motorVoltage + " speed: " +
         // ShooterConstants.kShooterPIDController.getGoal().position);
         if (ShooterConstants.kShooterProfiledPIDController.getGoal().position != 0.0) {
+            // motors should be at the same velocity because they are connected to the same axle
+            double axleVelocity = getAxleVelocityInRotationsPerSecond();
+            double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
             leftShooterMotor.setVoltage(motorVoltage);
             rightShooterMotor.setVoltage(motorVoltage);
         } else {
