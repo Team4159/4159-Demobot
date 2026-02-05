@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
@@ -50,8 +51,7 @@ public class Shooter extends SubsystemBase {
         // ShooterConstants.kShooterPIDController.getGoal().position);
         if (ShooterConstants.kShooterProfiledPIDController.getGoal().position != 0.0) {
             // motors should be at the same velocity because they are connected to the same axle
-            double axleVelocity = getAxleVelocityInRotationsPerSecond();
-            double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(axleVelocity);
+            double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(getAxleVelocity().in(RotationsPerSecond));
             leftShooterMotor.setVoltage(motorVoltage);
             rightShooterMotor.setVoltage(motorVoltage);
         } else {
@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocityInRotationsPerSecond());
+        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocity().in(RotationsPerSecond));
         // System.out.println(speed);
         ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
@@ -88,8 +88,8 @@ public class Shooter extends SubsystemBase {
         return ShooterConstants.kShooterProfiledPIDController.atGoal();
     }
 
-    private double getAxleVelocityInRotationsPerSecond() {
-        return RotationsPerSecond.convertFrom(leftShooterMotor.getEncoder().getVelocity(), RPM);
+    private AngularVelocity getAxleVelocity() {
+        return RPM.of(leftShooterMotor.getEncoder().getVelocity());
     }
 
     public class AdjustHood extends Command {
