@@ -59,7 +59,7 @@ public class Turret extends SubsystemBase {
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
                 double desiredAngle = Math
-                        .abs(inputAngle - lastInputAngle) >= TurretConstants.kInputAngleInputMinimumChange
+                        .abs(inputAngle - lastInputAngle) >= TurretConstants.kInputAngleJitterBuffer
                                 ? inputAngle
                                 : lastInputAngle;
                 double wantedTurretSetpoint = Units.radiansToRotations(TurretConstants.kInputAngleScalar

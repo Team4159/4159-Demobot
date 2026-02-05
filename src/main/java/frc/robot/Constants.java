@@ -65,7 +65,7 @@ public final class Constants {
 
     public static final double kInputDeadzone = 0.75;
     public static final double kInputAngleScalar = 0.5;
-    public static final double kInputAngleInputMinimumChange = Units.degreesToRadians(5);
+    public static final double kInputAngleJitterBuffer = Units.degreesToRadians(5);
 
     public static final double kTurretMotorGearRatio = 54.0;
 
