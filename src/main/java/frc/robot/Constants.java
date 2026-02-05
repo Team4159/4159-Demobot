@@ -97,8 +97,8 @@ public final class Constants {
     public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(false);
     public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(true);
     public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
-        0.3, 0, 0,
-        new TrapezoidProfile.Constraints(60, 60));
+        3, 0, 0,
+        new TrapezoidProfile.Constraints(45, 60));
     static {
       kShooterProfiledPIDController.setTolerance(ShooterConstants.kSpinTolerance);
     }
@@ -141,7 +141,7 @@ public final class Constants {
 
     // ENUMS
     public static enum ShooterState {
-      IDLE(0), SHOOT(100), REVERSE(-20);
+      IDLE(0), SHOOT(100), REVERSE(-25);
 
       public final double speed;
 

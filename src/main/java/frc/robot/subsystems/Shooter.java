@@ -52,8 +52,13 @@ public class Shooter extends SubsystemBase {
         // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
         // motorVoltage + " speed: " +
         // ShooterConstants.kShooterPIDController.getGoal().position);
-        leftShooterMotor.setVoltage(motorVoltage);
-        rightShooterMotor.setVoltage(motorVoltage);
+        if (ShooterConstants.kShooterProfiledPIDController.getGoal().position != 0.0) {
+            leftShooterMotor.setVoltage(motorVoltage);
+            rightShooterMotor.setVoltage(motorVoltage);
+        } else {
+            leftShooterMotor.stopMotor();
+            rightShooterMotor.stopMotor();
+        }
     }
 
     public void setSpeed(double speed) {

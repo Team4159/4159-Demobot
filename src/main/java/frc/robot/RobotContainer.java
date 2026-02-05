@@ -89,9 +89,7 @@ public class RobotContainer {
         .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
     new FluentTrigger()
         .setDefault(feeder.new ChangeState(FeederState.IDLE))
-        .bind(intakeTrigger,
-            new Orchestrator().require(feeder).yield(shooter::isShooterReady)
-                .command(feeder.new ChangeState(FeederState.INTAKE)))
+        .bind(intakeTrigger, feeder.new ChangeState(FeederState.INTAKE))
         .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
     turretZeroTrigger.whileTrue(new Orchestrator()
         .yield(3)
