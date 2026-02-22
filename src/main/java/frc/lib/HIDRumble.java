@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 
-/*
+/**
  * rudimentary library for rumble feedback on controllers and HIDs
  */
 public class HIDRumble {
