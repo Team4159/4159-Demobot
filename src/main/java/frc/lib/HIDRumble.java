@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 
-/*
+/**
  * rudimentary library for rumble feedback on controllers and HIDs
  */
 public class HIDRumble {
@@ -57,9 +57,10 @@ public class HIDRumble {
     }
 
     private static class RumbleManager {
-        private final GenericHID hid;
-        private ArrayList<RumbleRequest> rumbleRequestList = new ArrayList<>();
+        private final ArrayList<RumbleRequest> rumbleRequestList = new ArrayList<>();
         private int highestPriorityRequestIndex = 0;
+
+        private final GenericHID hid;
 
         public RumbleManager(GenericHID hid) {
             this.hid = hid;
@@ -142,36 +143,40 @@ public class HIDRumble {
     }
 
     public static class RumbleRequest {
-        public final double start, lifespan, strength;
+        public final double start, duration, strength;
         public final RumbleType rumbleType;
         public final int priority;
 
-        public RumbleRequest(RumbleType rumbleType, double strength, int priority, double lifespan) {
+        public RumbleRequest(RumbleType rumbleType, double strength, double duration, int priority) {
             this.start = Timer.getFPGATimestamp();
             this.rumbleType = rumbleType;
             this.strength = MathUtil.clamp(strength, 0, 1);
+            this.duration = Math.max(0, duration);
             this.priority = priority;
-            this.lifespan = Math.max(0, lifespan);
         }
 
         public RumbleRequest(RumbleType rumbleType, double strength) {
-            this(rumbleType, strength, kDefaultRequestPriority, kDefaultRequestDuration);
+            this(rumbleType, strength, kDefaultRequestDuration, kDefaultRequestPriority);
         }
 
         public RumbleRequest(double strength) {
-            this(RumbleType.kBothRumble, strength, kDefaultRequestPriority, kDefaultRequestDuration);
+            this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, kDefaultRequestPriority);
         }
 
         public RumbleRequest(RumbleType rumbleType, double strength, int priority) {
-            this(rumbleType, strength, priority, kDefaultRequestDuration);
+            this(rumbleType, strength, kDefaultRequestDuration, priority);
+        }
+
+        public RumbleRequest(RumbleType rumbleType, double strength, double duration) {
+            this(rumbleType, strength, duration, kDefaultRequestPriority);
         }
 
         public RumbleRequest(double strength, int priority) {
-            this(RumbleType.kBothRumble, strength, priority, kDefaultRequestDuration);
+            this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, priority);
         }
 
         public boolean isExpired() {
-            return Timer.getFPGATimestamp() - start > lifespan;
+            return Timer.getFPGATimestamp() - start > duration;
         }
     }
 }

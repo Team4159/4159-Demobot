@@ -81,7 +81,7 @@ public class Turret extends SubsystemBase {
                         turretSetpoint = TurretConstants.kTurretAngleMinimum;
                     }
                     HIDRumble.rumble(controller,
-                            new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0, 0.3));
+                            new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0.3, 0));
                 }
                 previousTurretSetpointWithinRange = turretSetpointWithinRange;
                 previousWantedTurretSetpoint = wantedTurretSetpoint;

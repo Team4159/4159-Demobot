@@ -94,7 +94,7 @@ public class RobotContainer {
     turretZeroTrigger.whileTrue(new Orchestrator()
         .yield(3)
         .run(turnTurret::zeroTurret).run(() -> HIDRumble.rumble(driverController,
-            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 2, 0.15))));
+            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2))));
     hoodZeroTrigger.whileTrue(new Orchestrator()
         .yield(3)
         .require(shooter)
@@ -102,7 +102,7 @@ public class RobotContainer {
         .run(() -> {
           shooter.enableHoodReverseSoftLimit(false);
           HIDRumble.rumble(driverController,
-              new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 2, 0.15));
+              new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2));
         })
         .repeat(() -> HIDRumble.rumble(driverController,
             new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kHoodZeroStrength, 2)))
