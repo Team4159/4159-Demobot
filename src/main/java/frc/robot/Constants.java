@@ -97,8 +97,8 @@ public final class Constants {
     public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(false);
     public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(true);
     public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
-        3, 0, 0,
-        new TrapezoidProfile.Constraints(45, 60));
+        2.5, 0, 0,
+        new TrapezoidProfile.Constraints(30, 60));
     static {
       kShooterProfiledPIDController.setTolerance(ShooterConstants.kSpinTolerance);
     }
