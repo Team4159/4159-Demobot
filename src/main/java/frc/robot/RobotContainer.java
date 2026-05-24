@@ -46,10 +46,8 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Orchestra orchestra = new Orchestra();
 
-  private final String songPath = "song.chrp"; //TODO change chrp file from current placeholder
   //Generate chrp files with Pheonix Tuner X or https://gist.github.com/TheTripleV/4441f0e35e20b698f2ccd6e95be0fce8
-
-  private final TalonFX[] motors = { new TalonFX(0),  new TalonFX(1), new TalonFX(2), new TalonFX(3), new TalonFX(4)};
+  private final String songPath = "song.chrp"; //TODO change chrp file from current placeholder
 
   private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
@@ -75,8 +73,8 @@ public class RobotContainer {
     turret.setDefaultCommand(turnTurret);
 
     // Set up chrp file
-    for ( int i = 0; i < motors.length; i++) {
-      orchestra.addInstrument(motors[i]);
+    for (TalonFX motor : drivetrain.getMotors()) {
+      orchestra.addInstrument(motor);
     }
 
     orchestra.loadMusic(songPath);
@@ -97,14 +95,14 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    new FluentTrigger()
+    FluentTrigger.build()
         .bind(hoodUpTrigger, shooter.new AdjustHood(HoodState.UP))
         .bind(hoodDownTrigger, shooter.new AdjustHood(HoodState.DOWN));
-    new FluentTrigger()
+    FluentTrigger.build()
         .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
         .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
         .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
-    new FluentTrigger()
+    FluentTrigger.build()
         .setDefault(feeder.new ChangeState(FeederState.IDLE))
         .bind(intakeTrigger, feeder.new ChangeState(FeederState.INTAKE))
         .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
