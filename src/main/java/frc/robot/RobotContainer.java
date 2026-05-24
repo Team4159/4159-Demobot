@@ -19,6 +19,10 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Turret.TurretPositionControl;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Shooter;
+
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -40,6 +44,10 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder();
   private final Turret turret = new Turret();
   private final Shooter shooter = new Shooter();
+  private final Orchestra orchestra = new Orchestra();
+
+  //Generate chrp files with Pheonix Tuner X or https://gist.github.com/TheTripleV/4441f0e35e20b698f2ccd6e95be0fce8
+  private final String songPath = "song.chrp"; //TODO change chrp file from current placeholder
 
   private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
@@ -53,8 +61,8 @@ public class RobotContainer {
   private final Trigger hoodUpTrigger = driverController.rightBumper();
   private final Trigger hoodDownTrigger = driverController.rightTrigger();
   private final Trigger turretZeroTrigger = driverController.b();
+  
   private final Trigger hoodZeroTrigger = driverController.y();
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -63,6 +71,13 @@ public class RobotContainer {
     configureBindings();
     drivetrain.setDefaultCommand(drive);
     turret.setDefaultCommand(turnTurret);
+
+    // Set up chrp file
+    for (TalonFX motor : drivetrain.getMotors()) {
+      orchestra.addInstrument(motor);
+    }
+
+    orchestra.loadMusic(songPath);
   }
 
   /**
@@ -80,23 +95,27 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    new FluentTrigger()
+    FluentTrigger.build()
         .bind(hoodUpTrigger, shooter.new AdjustHood(HoodState.UP))
         .bind(hoodDownTrigger, shooter.new AdjustHood(HoodState.DOWN));
-    new FluentTrigger()
+    FluentTrigger.build()
         .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
         .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
         .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
-    new FluentTrigger()
+    FluentTrigger.build()
         .setDefault(feeder.new ChangeState(FeederState.IDLE))
         .bind(intakeTrigger, feeder.new ChangeState(FeederState.INTAKE))
         .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
     turretZeroTrigger.whileTrue(new Orchestrator()
+        .run(() -> orchestra.play())
         .yield(3)
+        .run(() -> orchestra.stop())
         .run(turnTurret::zeroTurret).run(() -> HIDRumble.rumble(driverController,
             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2))));
     hoodZeroTrigger.whileTrue(new Orchestrator()
+        .run(() -> orchestra.play())
         .yield(3)
+        .run(() -> orchestra.stop())
         .require(shooter)
         .command(shooter.new AdjustHood(HoodState.DOWN_SLOW))
         .run(() -> {

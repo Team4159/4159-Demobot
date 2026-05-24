@@ -38,6 +38,15 @@ public class Drivetrain extends SubsystemBase {
 
     }
 
+    public TalonFX[] getMotors() {
+        return new TalonFX[] {
+            leftMotor1,
+            leftMotor2,
+            rightMotor1,
+            rightMotor2
+        };
+    }
+
     public void drive(double leftSpeed, double rightSpeed) {
         leftSpeed = MathUtil.clamp(leftSpeed, -1, 1);
         rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
