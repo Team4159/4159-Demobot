@@ -46,8 +46,9 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Orchestra orchestra = new Orchestra();
 
-  //Generate chrp files with Pheonix Tuner X or https://gist.github.com/TheTripleV/4441f0e35e20b698f2ccd6e95be0fce8
-  private final String songPath = "song.chrp"; //TODO change chrp file from current placeholder
+  // Generate chrp files with Pheonix Tuner X or
+  // https://gist.github.com/TheTripleV/4441f0e35e20b698f2ccd6e95be0fce8
+  private final String songPath = "song.chrp"; // TODO change chrp file from current placeholder
 
   private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
@@ -61,8 +62,9 @@ public class RobotContainer {
   private final Trigger hoodUpTrigger = driverController.rightBumper();
   private final Trigger hoodDownTrigger = driverController.rightTrigger();
   private final Trigger turretZeroTrigger = driverController.b();
-  
+
   private final Trigger hoodZeroTrigger = driverController.y();
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -107,15 +109,15 @@ public class RobotContainer {
         .bind(intakeTrigger, feeder.new ChangeState(FeederState.INTAKE))
         .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
     turretZeroTrigger.whileTrue(new Orchestrator()
-        .run(() -> orchestra.play())
-        .yield(3)
         .run(() -> orchestra.stop())
+        .yield(3)
+        .run(() -> orchestra.play())
         .run(turnTurret::zeroTurret).run(() -> HIDRumble.rumble(driverController,
             new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2))));
     hoodZeroTrigger.whileTrue(new Orchestrator()
-        .run(() -> orchestra.play())
-        .yield(3)
         .run(() -> orchestra.stop())
+        .yield(3)
+        .run(() -> orchestra.play())
         .require(shooter)
         .command(shooter.new AdjustHood(HoodState.DOWN_SLOW))
         .run(() -> {
