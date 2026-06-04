@@ -1,11 +1,9 @@
-
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,16 +16,24 @@ import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.TurretConstants;
 
 public class Turret extends SubsystemBase {
-    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretMotorId, MotorType.kBrushless);
+
+    private final SparkMax turretMotor = new SparkMax(
+        Constants.TurretConstants.kTurretMotorId,
+        MotorType.kBrushless
+    );
+
     {
-        turretMotor.configure(TurretConstants.kTurretMotorConfig, ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+        turretMotor.configure(
+            TurretConstants.kTurretMotorConfig,
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
     }
 
-    public Turret() {
-    }
+    public Turret() {}
 
     public class TurretPositionControl extends Command {
+
         private final CommandXboxController controller;
         private double turretSetpoint;
 
@@ -44,7 +50,9 @@ public class Turret extends SubsystemBase {
             turretSetpoint = 0;
             previousTurretSetpointWithinRange = false;
             previousWantedTurretSetpoint = turretSetpoint;
-            TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
+            TurretConstants.kTurretProfiledPIDController.reset(
+                turretMotor.getEncoder().getPosition()
+            );
         }
 
         @Override
@@ -55,43 +63,72 @@ public class Turret extends SubsystemBase {
 
             if (magnitude >= TurretConstants.kInputDeadzone) {
                 double inputAngle = Math.atan2(inputY, inputX);
-                double lastInputAngle = turretSetpoint / TurretConstants.kInputAngleScalar;
+                double lastInputAngle =
+                    turretSetpoint / TurretConstants.kInputAngleScalar;
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
-                double desiredAngle = Math
-                        .abs(inputAngle - lastInputAngle) >= TurretConstants.kInputAngleJitterBuffer
-                                ? inputAngle
-                                : lastInputAngle;
-                double wantedTurretSetpoint = Units.radiansToRotations(TurretConstants.kInputAngleScalar
-                        * (((desiredAngle + Units.degreesToRadians(90) + Units.degreesToRadians(180))
-                                % Units.degreesToRadians(360))
-                                - Units.degreesToRadians(180)));
-                boolean turretSetpointWithinRange = wantedTurretSetpoint >= TurretConstants.kTurretAngleMinimum
-                        && wantedTurretSetpoint <= TurretConstants.kTurretAngleMaximum;
+                double desiredAngle =
+                    Math.abs(inputAngle - lastInputAngle) >=
+                    TurretConstants.kInputAngleJitterBuffer
+                        ? inputAngle
+                        : lastInputAngle;
+                double wantedTurretSetpoint = Units.radiansToRotations(
+                    TurretConstants.kInputAngleScalar *
+                        (((desiredAngle +
+                                    Units.degreesToRadians(90) +
+                                    Units.degreesToRadians(180)) %
+                                Units.degreesToRadians(360)) -
+                            Units.degreesToRadians(180))
+                );
+                boolean turretSetpointWithinRange =
+                    wantedTurretSetpoint >=
+                        TurretConstants.kTurretAngleMinimum &&
+                    wantedTurretSetpoint <= TurretConstants.kTurretAngleMaximum;
 
                 // convert turret position to rotations
                 if (turretSetpointWithinRange) {
                     turretSetpoint = wantedTurretSetpoint;
-                    HIDRumble.rumble(controller,
-                            new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnStrength, 0));
+                    HIDRumble.rumble(
+                        controller,
+                        new RumbleRequest(
+                            RumbleType.kLeftRumble,
+                            RumbleConstants.kTurretTurnStrength,
+                            0
+                        )
+                    );
                 } else if (previousTurretSetpointWithinRange) {
                     if (previousWantedTurretSetpoint > 0) {
                         turretSetpoint = TurretConstants.kTurretAngleMaximum;
                     } else {
                         turretSetpoint = TurretConstants.kTurretAngleMinimum;
                     }
-                    HIDRumble.rumble(controller,
-                            new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0.3, 0));
+                    HIDRumble.rumble(
+                        controller,
+                        new RumbleRequest(
+                            RumbleType.kRightRumble,
+                            RumbleConstants.kTurretTripStrength,
+                            0.3,
+                            0
+                        )
+                    );
                 }
                 previousTurretSetpointWithinRange = turretSetpointWithinRange;
                 previousWantedTurretSetpoint = wantedTurretSetpoint;
             }
 
-            double motorSetpoint = turretSetpoint * TurretConstants.kTurretMotorGearRatio;
-            double pidVoltage = TurretConstants.kTurretProfiledPIDController
-                    .calculate(turretMotor.getEncoder().getPosition(), motorSetpoint);
-            double feedforwardVoltage = TurretConstants.kTurretFeedforward
-                    .calculate(TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity);
+            double motorSetpoint =
+                turretSetpoint * TurretConstants.kTurretMotorGearRatio;
+            double pidVoltage =
+                TurretConstants.kTurretProfiledPIDController.calculate(
+                    turretMotor.getEncoder().getPosition(),
+                    motorSetpoint
+                );
+            double feedforwardVoltage =
+                TurretConstants.kTurretFeedforward.calculate(
+                    TurretConstants.kTurretProfiledPIDController
+                        .getSetpoint()
+                        .velocity
+                );
             turretMotor.set((pidVoltage + feedforwardVoltage) / 12.0);
         }
 

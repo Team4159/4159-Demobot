@@ -1,5 +1,8 @@
 package frc.lib;
 
+import edu.wpi.first.math.MathSharedStore;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,27 +10,25 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.MathSharedStore;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public class Orchestrator extends Command {
 
     private enum RunBlockStatus {
-        CONTINUE, JUMP, YIELD, EXIT
+        CONTINUE,
+        JUMP,
+        YIELD,
+        EXIT,
     }
 
-    private record RunBlock(Supplier<RunBlockStatus> callback) {
-    }
+    private record RunBlock(Supplier<RunBlockStatus> callback) {}
 
-    private record RunStack(Command command, boolean repeating) {
-    }
+    private record RunStack(Command command, boolean repeating) {}
 
     private final ArrayList<RunBlock> blocks = new ArrayList<>();
 
     private final ArrayList<RunStack> stacks = new ArrayList<>();
     private final ArrayList<RunStack> untrackedStacks = new ArrayList<>();
-    private final Map<String, ArrayList<RunStack>> trackedStacks = new HashMap<>();
+    private final Map<String, ArrayList<RunStack>> trackedStacks =
+        new HashMap<>();
 
     private final Map<String, Integer> labels = new HashMap<>();
 
@@ -38,9 +39,7 @@ public class Orchestrator extends Command {
     private boolean runFinished;
     private double lastBlockInitializedSeconds;
 
-    public Orchestrator() {
-
-    }
+    public Orchestrator() {}
 
     @Override
     public void initialize() {
@@ -169,7 +168,11 @@ public class Orchestrator extends Command {
         return this;
     }
 
-    public Orchestrator jumpif(BooleanSupplier condition, String trueLabel, String falseLabel) {
+    public Orchestrator jumpif(
+        BooleanSupplier condition,
+        String trueLabel,
+        String falseLabel
+    ) {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueLabel != null) {
@@ -197,7 +200,11 @@ public class Orchestrator extends Command {
         return this;
     }
 
-    public Orchestrator runif(BooleanSupplier condition, Runnable trueCallback, Runnable falseCallback) {
+    public Orchestrator runif(
+        BooleanSupplier condition,
+        Runnable trueCallback,
+        Runnable falseCallback
+    ) {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueCallback != null) {
@@ -213,7 +220,10 @@ public class Orchestrator extends Command {
         return this;
     }
 
-    public Orchestrator runif(BooleanSupplier condition, Runnable trueCallback) {
+    public Orchestrator runif(
+        BooleanSupplier condition,
+        Runnable trueCallback
+    ) {
         return runif(condition, trueCallback, null);
     }
 
@@ -229,8 +239,13 @@ public class Orchestrator extends Command {
         return repeat(null, callback);
     }
 
-    public Orchestrator repeatif(BooleanSupplier condition, String trueGroup, Runnable trueCallback, String falseGroup,
-            Runnable falseCallback) {
+    public Orchestrator repeatif(
+        BooleanSupplier condition,
+        String trueGroup,
+        Runnable trueCallback,
+        String falseGroup,
+        Runnable falseCallback
+    ) {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueCallback != null) {
@@ -246,15 +261,26 @@ public class Orchestrator extends Command {
         return this;
     }
 
-    public Orchestrator repeatif(BooleanSupplier condition, String trueGroup, Runnable trueCallback) {
+    public Orchestrator repeatif(
+        BooleanSupplier condition,
+        String trueGroup,
+        Runnable trueCallback
+    ) {
         return repeatif(condition, trueGroup, trueCallback, null, null);
     }
 
-    public Orchestrator repeatif(BooleanSupplier condition, Runnable trueCallback) {
+    public Orchestrator repeatif(
+        BooleanSupplier condition,
+        Runnable trueCallback
+    ) {
         return repeatif(condition, null, trueCallback, null, null);
     }
 
-    public Orchestrator repeatif(BooleanSupplier condition, Runnable trueCallback, Runnable falseCallback) {
+    public Orchestrator repeatif(
+        BooleanSupplier condition,
+        Runnable trueCallback,
+        Runnable falseCallback
+    ) {
         return repeatif(condition, null, trueCallback, null, falseCallback);
     }
 
@@ -270,8 +296,13 @@ public class Orchestrator extends Command {
         return command(null, command);
     }
 
-    public Orchestrator commandif(BooleanSupplier condition, String trueGroup, Command trueCommand, String falseGroup,
-            Command falseCommand) {
+    public Orchestrator commandif(
+        BooleanSupplier condition,
+        String trueGroup,
+        Command trueCommand,
+        String falseGroup,
+        Command falseCommand
+    ) {
         addBlock(() -> {
             if (condition.getAsBoolean()) {
                 if (trueCommand != null) {
@@ -287,7 +318,11 @@ public class Orchestrator extends Command {
         return this;
     }
 
-    public Orchestrator commandif(BooleanSupplier condition, String group, Command command) {
+    public Orchestrator commandif(
+        BooleanSupplier condition,
+        String group,
+        Command command
+    ) {
         return commandif(condition, group, command, null, null);
     }
 
@@ -295,16 +330,26 @@ public class Orchestrator extends Command {
         return commandif(condition, null, command, null, null);
     }
 
-    public Orchestrator commandif(BooleanSupplier condition, Command trueCommand, Command falseCommand) {
+    public Orchestrator commandif(
+        BooleanSupplier condition,
+        Command trueCommand,
+        Command falseCommand
+    ) {
         return commandif(condition, null, trueCommand, null, falseCommand);
     }
 
-    public Orchestrator yield(double timeoutSeconds, BooleanSupplier condition) {
+    public Orchestrator yield(
+        double timeoutSeconds,
+        BooleanSupplier condition
+    ) {
         addBlock(() -> {
-            if (!condition.getAsBoolean() && getTime() - lastBlockInitializedSeconds <= timeoutSeconds) {
+            if (
+                !condition.getAsBoolean() &&
+                getTime() - lastBlockInitializedSeconds <= timeoutSeconds
+            ) {
                 return RunBlockStatus.YIELD;
             }
-           return RunBlockStatus.CONTINUE;
+            return RunBlockStatus.CONTINUE;
         });
         return this;
     }
@@ -406,7 +451,11 @@ public class Orchestrator extends Command {
         blocks.add(new RunBlock(callback));
     }
 
-    private RunStack addStack(String group, Command command, boolean repeating) {
+    private RunStack addStack(
+        String group,
+        Command command,
+        boolean repeating
+    ) {
         command.initialize();
         RunStack stack = new RunStack(command, repeating);
         stacks.add(stack);

@@ -3,8 +3,11 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,32 +15,48 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterConstants.HoodState;
 import frc.robot.Constants.ShooterConstants.ShooterState;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
 public class Shooter extends SubsystemBase {
+
     /*
      * Write subsystem code for the shooter of Demobot, it uses two
      * Neos as the shooter motors as well as a Neo 550 to control
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
-    private final SparkMax rightShooterMotor = new SparkMax(ShooterConstants.kRightShooterMotorId,
-            MotorType.kBrushless);
+    private final SparkMax leftShooterMotor = new SparkMax(
+        ShooterConstants.kLeftShooterMotorId,
+        MotorType.kBrushless
+    );
+    private final SparkMax rightShooterMotor = new SparkMax(
+        ShooterConstants.kRightShooterMotorId,
+        MotorType.kBrushless
+    );
+
     {
-        leftShooterMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
-        rightShooterMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+        leftShooterMotor.configure(
+            new SparkMaxConfig().inverted(false),
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
+        rightShooterMotor.configure(
+            new SparkMaxConfig().inverted(true),
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
     }
+
     // one Neo 550
-    private final SparkMax hoodMotor = new SparkMax(ShooterConstants.kHoodMotorId, MotorType.kBrushless);
+    private final SparkMax hoodMotor = new SparkMax(
+        ShooterConstants.kHoodMotorId,
+        MotorType.kBrushless
+    );
+
     {
-        hoodMotor.configure(ShooterConstants.kHoodMotorConfig, ResetMode.kNoResetSafeParameters,
-                PersistMode.kNoPersistParameters);
+        hoodMotor.configure(
+            ShooterConstants.kHoodMotorConfig,
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
     }
 
     public Shooter() {
@@ -49,9 +68,15 @@ public class Shooter extends SubsystemBase {
         // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
         // motorVoltage + " speed: " +
         // ShooterConstants.kShooterPIDController.getGoal().position);
-        if (ShooterConstants.kShooterProfiledPIDController.getGoal().position != 0.0) {
+        if (
+            ShooterConstants.kShooterProfiledPIDController.getGoal().position !=
+            0.0
+        ) {
             // motors should be at the same velocity because they are connected to the same axle
-            double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(getAxleVelocity().in(RotationsPerSecond));
+            double motorVoltage =
+                ShooterConstants.kShooterProfiledPIDController.calculate(
+                    getAxleVelocity().in(RotationsPerSecond)
+                );
             leftShooterMotor.setVoltage(motorVoltage);
             rightShooterMotor.setVoltage(motorVoltage);
         } else {
@@ -61,7 +86,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocity().in(RotationsPerSecond));
+        ShooterConstants.kShooterProfiledPIDController.reset(
+            getAxleVelocity().in(RotationsPerSecond)
+        );
         // System.out.println(speed);
         ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
@@ -77,11 +104,18 @@ public class Shooter extends SubsystemBase {
     public void enableHoodReverseSoftLimit(boolean enabled) {
         var reverseConfig = new SparkMaxConfig();
         reverseConfig.softLimit.reverseSoftLimitEnabled(enabled);
-        hoodMotor.configure(reverseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        hoodMotor.configure(
+            reverseConfig,
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
     }
 
     public boolean isShooterReady() {
-        if (ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <= 0) {
+        if (
+            ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <=
+            0
+        ) {
             // must be spinning in the positive direction to be shooting
             return false;
         }
@@ -93,6 +127,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public class AdjustHood extends Command {
+
         private final HoodState state;
 
         public AdjustHood(HoodState state) {
@@ -113,6 +148,7 @@ public class Shooter extends SubsystemBase {
 
     // controls the spin of the shooter
     public class ControlSpin extends Command {
+
         private final ShooterState shooterState;
 
         public ControlSpin(ShooterState shooterState) {

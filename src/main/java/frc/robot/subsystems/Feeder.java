@@ -5,22 +5,36 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.FeederConstants.FeederState;
 
 public class Feeder extends SubsystemBase {
-    private final SparkMax leftMotor = new SparkMax(FeederConstants.kLeftMotorId, MotorType.kBrushless);
-    private final SparkMax rightMotor = new SparkMax(FeederConstants.kRightMotorId, MotorType.kBrushless);
+
+    private final SparkMax leftMotor = new SparkMax(
+        FeederConstants.kLeftMotorId,
+        MotorType.kBrushless
+    );
+    private final SparkMax rightMotor = new SparkMax(
+        FeederConstants.kRightMotorId,
+        MotorType.kBrushless
+    );
+
     {
-        leftMotor.configure(new SparkMaxConfig().inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        rightMotor.configure(new SparkMaxConfig().inverted(true), ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        leftMotor.configure(
+            new SparkMaxConfig().inverted(false),
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
+        rightMotor.configure(
+            new SparkMaxConfig().inverted(true),
+            ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
+        );
     }
 
-    public Feeder() {
-    }
+    public Feeder() {}
 
     public void setState(FeederState state) {
         leftMotor.set(state.speed);
@@ -28,6 +42,7 @@ public class Feeder extends SubsystemBase {
     }
 
     public class ChangeState extends Command {
+
         private final FeederState state;
 
         public ChangeState(FeederState state) {

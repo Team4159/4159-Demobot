@@ -1,49 +1,55 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.Constants;
 import frc.robot.Constants.ArcadeDriveConstants;
 import frc.robot.Constants.DrivetrainConstants;
 
 public class Drivetrain extends SubsystemBase {
-    private final TalonFX leftMotor1 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor1Id);
-    private final TalonFX leftMotor2 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor2Id);
-    private final TalonFX rightMotor1 = new TalonFX(Constants.DrivetrainConstants.kRightMotor1Id);
-    private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.kRightMotor2Id);
+
+    private final TalonFX leftMotor1 = new TalonFX(
+        Constants.DrivetrainConstants.kLeftMotor1Id
+    );
+    private final TalonFX leftMotor2 = new TalonFX(
+        Constants.DrivetrainConstants.kLeftMotor2Id
+    );
+    private final TalonFX rightMotor1 = new TalonFX(
+        Constants.DrivetrainConstants.kRightMotor1Id
+    );
+    private final TalonFX rightMotor2 = new TalonFX(
+        Constants.DrivetrainConstants.kRightMotor2Id
+    );
+
     {
         var leftMotorConfig = new MotorOutputConfigs()
-                .withInverted(InvertedValue.CounterClockwise_Positive)
-                .withNeutralMode(NeutralModeValue.Brake);
+            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
         leftMotor1.getConfigurator().apply(leftMotorConfig);
         leftMotor2.getConfigurator().apply(leftMotorConfig);
 
         var rightMotorConfig = new MotorOutputConfigs()
-                .withInverted(InvertedValue.Clockwise_Positive)
-                .withNeutralMode(NeutralModeValue.Brake);
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
         rightMotor1.getConfigurator().apply(rightMotorConfig);
         rightMotor2.getConfigurator().apply(rightMotorConfig);
     }
 
-    public Drivetrain() {
-
-    }
+    public Drivetrain() {}
 
     public TalonFX[] getMotors() {
         return new TalonFX[] {
             leftMotor1,
             leftMotor2,
             rightMotor1,
-            rightMotor2
+            rightMotor2,
         };
     }
 
@@ -66,6 +72,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public class TankDrive extends Command {
+
         private CommandXboxController controller;
 
         public TankDrive(CommandXboxController controller) {
@@ -75,7 +82,10 @@ public class Drivetrain extends SubsystemBase {
 
         @Override
         public void execute() {
-            Drivetrain.this.drive(controller.getLeftY(), controller.getRightY());
+            Drivetrain.this.drive(
+                controller.getLeftY(),
+                controller.getRightY()
+            );
         }
 
         @Override
@@ -85,6 +95,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public class ArcadeDrive extends Command {
+
         private CommandXboxController controller;
 
         public ArcadeDrive(CommandXboxController controller) {
@@ -98,26 +109,50 @@ public class Drivetrain extends SubsystemBase {
             double inputY = controller.getLeftY();
             double forwardDirection = Math.signum(inputY);
             double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
-            double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.kInputDeadzone, 1);
+            double correctedMagnitude = MathUtil.applyDeadband(
+                rawMagnitude,
+                ArcadeDriveConstants.kInputDeadzone,
+                1
+            );
 
             // absolute angles
-            double absoluteAngleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
-            double absoluteAngleFromVertical = Math
-                    .abs(Units.degreesToRadians(90) - Math.abs(absoluteAngleFromHorizontal));
+            double absoluteAngleFromHorizontal = Math.atan2(
+                Math.abs(inputY),
+                Math.abs(inputX)
+            );
+            double absoluteAngleFromVertical = Math.abs(
+                Units.degreesToRadians(90) -
+                    Math.abs(absoluteAngleFromHorizontal)
+            );
 
-            double leftDirection = 0, rightDirection = 0;
+            double leftDirection = 0,
+                rightDirection = 0;
             if (rawMagnitude >= ArcadeDriveConstants.kInputDeadzone) {
                 double rotationAlpha;
-                if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
+                if (
+                    absoluteAngleFromVertical <=
+                    ArcadeDriveConstants.kTranslationBufferAngle
+                ) {
                     rotationAlpha = forwardDirection;
-                } else if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
+                } else if (
+                    absoluteAngleFromHorizontal <=
+                    ArcadeDriveConstants.kRotationBufferAngle
+                ) {
                     rotationAlpha = 0;
                 } else {
                     // range of analog motion that is outside of the buffer zones
-                    double analogRange = Units.degreesToRadians(90) - (ArcadeDriveConstants.kRotationBufferAngle
-                            + ArcadeDriveConstants.kTranslationBufferAngle);
-                    double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
-                    rotationAlpha = MathUtil.clamp(forwardDirection * (relativeAngle / analogRange), -1, 1);
+                    double analogRange =
+                        Units.degreesToRadians(90) -
+                        (ArcadeDriveConstants.kRotationBufferAngle +
+                            ArcadeDriveConstants.kTranslationBufferAngle);
+                    double relativeAngle =
+                        absoluteAngleFromHorizontal -
+                        ArcadeDriveConstants.kRotationBufferAngle;
+                    rotationAlpha = MathUtil.clamp(
+                        forwardDirection * (relativeAngle / analogRange),
+                        -1,
+                        1
+                    );
                 }
 
                 // get directions

@@ -1,16 +1,17 @@
 package frc.lib;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FluentTrigger {
+
     private class TriggerState {
+
         private final int priority;
 
         public TriggerState(int priority) {
@@ -25,8 +26,7 @@ public class FluentTrigger {
     private Command activeCommand;
     private Command defaultCommand;
 
-    private FluentTrigger() {
-    }
+    private FluentTrigger() {}
 
     public static FluentTrigger build() {
         return new FluentTrigger();
@@ -34,7 +34,9 @@ public class FluentTrigger {
 
     public FluentTrigger setDefault(Command defaultCommand) {
         if (this.defaultCommand != null) {
-            throw new IllegalStateException("FluentTrigger default command already set");
+            throw new IllegalStateException(
+                "FluentTrigger default command already set"
+            );
         }
         this.defaultCommand = defaultCommand;
         this.activeCommand = defaultCommand;

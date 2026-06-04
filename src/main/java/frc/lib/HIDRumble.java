@@ -1,30 +1,32 @@
 package frc.lib;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-
 /**
  * rudimentary library for rumble feedback on controllers and HIDs
  */
 public class HIDRumble {
-    private static final double kDefaultRequestDuration = Units.millisecondsToSeconds(50);
+
+    private static final double kDefaultRequestDuration =
+        Units.millisecondsToSeconds(50);
     private static final int kDefaultRequestPriority = 0;
     private static final boolean kRumblePersistWhileDisabled = false;
 
     private static boolean rumbleEnabled = true;
 
-    private static final HashMap<GenericHID, RumbleManager> rumbleManagerMap = new HashMap<>();
+    private static final HashMap<GenericHID, RumbleManager> rumbleManagerMap =
+        new HashMap<>();
 
     @SuppressWarnings("unused")
     private static final HIDRumble instance = new HIDRumble();
@@ -34,7 +36,10 @@ public class HIDRumble {
             @Override
             public void periodic() {
                 // update all rumble managers
-                for (Map.Entry<GenericHID, RumbleManager> rumbleManagerEntry : rumbleManagerMap.entrySet()) {
+                for (Map.Entry<
+                    GenericHID,
+                    RumbleManager
+                > rumbleManagerEntry : rumbleManagerMap.entrySet()) {
                     RumbleManager rumbleManager = rumbleManagerEntry.getValue();
                     rumbleManager.update();
                 }
@@ -44,11 +49,16 @@ public class HIDRumble {
 
     public static void rumble(GenericHID hid, RumbleRequest rumbleRequest) {
         RumbleManager existingRumbleManager = rumbleManagerMap.get(hid);
-        RumbleManager rumbleManager = (existingRumbleManager != null) ? existingRumbleManager : new RumbleManager(hid);
+        RumbleManager rumbleManager = (existingRumbleManager != null)
+            ? existingRumbleManager
+            : new RumbleManager(hid);
         rumbleManager.request(rumbleRequest);
     }
 
-    public static void rumble(CommandGenericHID commandHid, RumbleRequest rumbleRequest) {
+    public static void rumble(
+        CommandGenericHID commandHid,
+        RumbleRequest rumbleRequest
+    ) {
         rumble(commandHid.getHID(), rumbleRequest);
     }
 
@@ -57,7 +67,9 @@ public class HIDRumble {
     }
 
     private static class RumbleManager {
-        private final ArrayList<RumbleRequest> rumbleRequestList = new ArrayList<>();
+
+        private final ArrayList<RumbleRequest> rumbleRequestList =
+            new ArrayList<>();
         private int highestPriorityRequestIndex = 0;
 
         private final GenericHID hid;
@@ -81,13 +93,17 @@ public class HIDRumble {
                 rumbleRequestList.clear();
                 highestPriorityRequestIndex = 0;
             } else {
-                Iterator<RumbleRequest> removeIterator = rumbleRequestList.iterator();
+                Iterator<RumbleRequest> removeIterator =
+                    rumbleRequestList.iterator();
                 boolean removedHighestPriorityRequest = false;
                 while (removeIterator.hasNext()) {
                     RumbleRequest rumbleRequest = removeIterator.next();
                     if (rumbleRequest.isExpired()) {
                         removeIterator.remove();
-                        if (rumbleRequest.priority == highestPriorityRequestIndex) {
+                        if (
+                            rumbleRequest.priority ==
+                            highestPriorityRequestIndex
+                        ) {
                             removedHighestPriorityRequest = true;
                         }
                     }
@@ -105,7 +121,8 @@ public class HIDRumble {
         }
 
         private void setRumbleFromRequest(RumbleRequest rumbleRequest) {
-            double leftStrength = 0, rightStrength = 0;
+            double leftStrength = 0,
+                rightStrength = 0;
             switch (rumbleRequest.rumbleType) {
                 case kLeftRumble:
                     leftStrength = rumbleRequest.strength;
@@ -143,11 +160,17 @@ public class HIDRumble {
     }
 
     public static class RumbleRequest {
+
         public final double start, duration, strength;
         public final RumbleType rumbleType;
         public final int priority;
 
-        public RumbleRequest(RumbleType rumbleType, double strength, double duration, int priority) {
+        public RumbleRequest(
+            RumbleType rumbleType,
+            double strength,
+            double duration,
+            int priority
+        ) {
             this.start = Timer.getFPGATimestamp();
             this.rumbleType = rumbleType;
             this.strength = MathUtil.clamp(strength, 0, 1);
@@ -156,23 +179,46 @@ public class HIDRumble {
         }
 
         public RumbleRequest(RumbleType rumbleType, double strength) {
-            this(rumbleType, strength, kDefaultRequestDuration, kDefaultRequestPriority);
+            this(
+                rumbleType,
+                strength,
+                kDefaultRequestDuration,
+                kDefaultRequestPriority
+            );
         }
 
         public RumbleRequest(double strength) {
-            this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, kDefaultRequestPriority);
+            this(
+                RumbleType.kBothRumble,
+                strength,
+                kDefaultRequestDuration,
+                kDefaultRequestPriority
+            );
         }
 
-        public RumbleRequest(RumbleType rumbleType, double strength, int priority) {
+        public RumbleRequest(
+            RumbleType rumbleType,
+            double strength,
+            int priority
+        ) {
             this(rumbleType, strength, kDefaultRequestDuration, priority);
         }
 
-        public RumbleRequest(RumbleType rumbleType, double strength, double duration) {
+        public RumbleRequest(
+            RumbleType rumbleType,
+            double strength,
+            double duration
+        ) {
             this(rumbleType, strength, duration, kDefaultRequestPriority);
         }
 
         public RumbleRequest(double strength, int priority) {
-            this(RumbleType.kBothRumble, strength, kDefaultRequestDuration, priority);
+            this(
+                RumbleType.kBothRumble,
+                strength,
+                kDefaultRequestDuration,
+                priority
+            );
         }
 
         public boolean isExpired() {
