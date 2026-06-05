@@ -123,7 +123,15 @@ public class Shooter extends SubsystemBase {
     }
 
     private AngularVelocity getAxleVelocity() {
+        return getLeftVelocity().plus(getRightVelocity()).div(2);
+    }
+
+    private AngularVelocity getLeftVelocity() {
         return RPM.of(leftShooterMotor.getEncoder().getVelocity());
+    }
+
+    private AngularVelocity getRightVelocity() {
+        return RPM.of(rightShooterMotor.getEncoder().getVelocity());
     }
 
     public class AdjustHood extends Command {
