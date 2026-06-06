@@ -104,11 +104,13 @@ public class RobotContainer {
         new FluentTrigger.Builder()
             .defaultCommand(shooter.new ControlSpin(ShooterState.IDLE))
             .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
-            .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
+            .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE))
+            .build();
         new FluentTrigger.Builder()
             .defaultCommand(feeder.new ChangeState(FeederState.IDLE))
             .bind(intakeTrigger, feeder.new ChangeState(FeederState.INTAKE))
-            .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
+            .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE))
+            .build();
         turretZeroTrigger.whileTrue(
             new Orchestrator()
                 .run(() -> orchestra.stop())
