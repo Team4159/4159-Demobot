@@ -23,10 +23,7 @@ public class Shooter extends SubsystemBase {
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax leftShooterMotor = new SparkMax(
-        ShooterConstants.kLeftShooterMotorId,
-        MotorType.kBrushless
-    );
+    private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
     private final SparkMax rightShooterMotor = new SparkMax(
         ShooterConstants.kRightShooterMotorId,
         MotorType.kBrushless
@@ -46,10 +43,7 @@ public class Shooter extends SubsystemBase {
     }
 
     // one Neo 550
-    private final SparkMax hoodMotor = new SparkMax(
-        ShooterConstants.kHoodMotorId,
-        MotorType.kBrushless
-    );
+    private final SparkMax hoodMotor = new SparkMax(ShooterConstants.kHoodMotorId, MotorType.kBrushless);
 
     {
         hoodMotor.configure(
@@ -68,15 +62,11 @@ public class Shooter extends SubsystemBase {
         // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
         // motorVoltage + " speed: " +
         // ShooterConstants.kShooterPIDController.getGoal().position);
-        if (
-            ShooterConstants.kShooterProfiledPIDController.getGoal().position !=
-            0.0
-        ) {
+        if (ShooterConstants.kShooterProfiledPIDController.getGoal().position != 0.0) {
             // motors should be at the same velocity because they are connected to the same axle
-            double motorVoltage =
-                ShooterConstants.kShooterProfiledPIDController.calculate(
-                    getAxleVelocity().in(RotationsPerSecond)
-                );
+            double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(
+                getAxleVelocity().in(RotationsPerSecond)
+            );
             leftShooterMotor.setVoltage(motorVoltage);
             rightShooterMotor.setVoltage(motorVoltage);
         } else {
@@ -86,9 +76,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterProfiledPIDController.reset(
-            getAxleVelocity().in(RotationsPerSecond)
-        );
+        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocity().in(RotationsPerSecond));
         // System.out.println(speed);
         ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
     }
@@ -104,18 +92,11 @@ public class Shooter extends SubsystemBase {
     public void enableHoodReverseSoftLimit(boolean enabled) {
         var reverseConfig = new SparkMaxConfig();
         reverseConfig.softLimit.reverseSoftLimitEnabled(enabled);
-        hoodMotor.configure(
-            reverseConfig,
-            ResetMode.kNoResetSafeParameters,
-            PersistMode.kNoPersistParameters
-        );
+        hoodMotor.configure(reverseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public boolean isShooterReady() {
-        if (
-            ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <=
-            0
-        ) {
+        if (ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <= 0) {
             // must be spinning in the positive direction to be shooting
             return false;
         }

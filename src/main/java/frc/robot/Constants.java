@@ -32,10 +32,8 @@ public final class Constants {
 
     public static class ArcadeDriveConstants {
 
-        public static final double kTranslationBufferAngle =
-            Units.degreesToRadians(15);
-        public static final double kRotationBufferAngle =
-            Units.degreesToRadians(15);
+        public static final double kTranslationBufferAngle = Units.degreesToRadians(15);
+        public static final double kRotationBufferAngle = Units.degreesToRadians(15);
         public static final double kInputDeadzone = 0.3;
     }
 
@@ -73,17 +71,13 @@ public final class Constants {
 
         public static final double kInputDeadzone = 0.75;
         public static final double kInputAngleScalar = 0.5;
-        public static final double kInputAngleJitterBuffer =
-            Units.degreesToRadians(5);
+        public static final double kInputAngleJitterBuffer = Units.degreesToRadians(5);
 
         public static final double kTurretMotorGearRatio = 54.0;
 
-        public static final double kTurretAngleMinimum =
-            Units.degreesToRotations(-45);
-        public static final double kTurretAngleMaximum =
-            Units.degreesToRotations(45);
-        public static final SparkMaxConfig kTurretMotorConfig =
-            new SparkMaxConfig();
+        public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
+        public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
+        public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
 
         static {
             kTurretMotorConfig.idleMode(IdleMode.kBrake).inverted(true);
@@ -94,15 +88,13 @@ public final class Constants {
                 .reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
         }
 
-        public static final ProfiledPIDController kTurretProfiledPIDController =
-            new ProfiledPIDController(
-                0.4,
-                0.0,
-                0.02,
-                new TrapezoidProfile.Constraints(30, 150)
-            );
-        public static final SimpleMotorFeedforward kTurretFeedforward =
-            new SimpleMotorFeedforward(0.05, 0.1, 0);
+        public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
+            0.4,
+            0.0,
+            0.02,
+            new TrapezoidProfile.Constraints(30, 150)
+        );
+        public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.05, 0.1, 0);
     }
 
     public static class ShooterConstants {
@@ -113,34 +105,28 @@ public final class Constants {
         public static final int kHoodMotorId = 7;
 
         // pid
-        public static final SparkMaxConfig kLeftShooterMotorConfig =
-            (SparkMaxConfig) new SparkMaxConfig().inverted(false);
-        public static final SparkMaxConfig kRightShooterMotorConfig =
-            (SparkMaxConfig) new SparkMaxConfig().inverted(true);
-        public static final ProfiledPIDController kShooterProfiledPIDController =
-            new ProfiledPIDController(
-                2.5,
-                0,
-                0,
-                new TrapezoidProfile.Constraints(30, 60)
-            );
+        public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(
+            false
+        );
+        public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(
+            true
+        );
+        public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
+            2.5,
+            0,
+            0,
+            new TrapezoidProfile.Constraints(30, 60)
+        );
 
         static {
-            kShooterProfiledPIDController.setTolerance(
-                ShooterConstants.kSpinTolerance
-            );
+            kShooterProfiledPIDController.setTolerance(ShooterConstants.kSpinTolerance);
         }
 
         // hood angle ranges
-        public static final double kHoodAngleMinimum = Units.degreesToRotations(
-            0
-        );
-        public static final double kHoodAngleMaximum = Units.degreesToRotations(
-            60
-        );
+        public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
+        public static final double kHoodAngleMaximum = Units.degreesToRotations(60);
         public static final double kHoodGearRatio = 25.0; // does not affect offset
-        public static final SparkMaxConfig kHoodMotorConfig =
-            new SparkMaxConfig();
+        public static final SparkMaxConfig kHoodMotorConfig = new SparkMaxConfig();
 
         static {
             kHoodMotorConfig.inverted(false);
@@ -167,9 +153,7 @@ public final class Constants {
         // ----- tolerances: so if the motors/whatnot are a bit off, it'll still
         // work------
         // pitch refers to the angle
-        public static final double kPitchTolerance = Units.degreesToRotations(
-            5
-        );
+        public static final double kPitchTolerance = Units.degreesToRotations(5);
         // used the value for spinTolerance from FRC-2024
         public static final double kSpinTolerance = 5;
 

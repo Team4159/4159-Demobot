@@ -12,14 +12,8 @@ import frc.robot.Constants.FeederConstants.FeederState;
 
 public class Feeder extends SubsystemBase {
 
-    private final SparkMax leftMotor = new SparkMax(
-        FeederConstants.kLeftMotorId,
-        MotorType.kBrushless
-    );
-    private final SparkMax rightMotor = new SparkMax(
-        FeederConstants.kRightMotorId,
-        MotorType.kBrushless
-    );
+    private final SparkMax leftMotor = new SparkMax(FeederConstants.kLeftMotorId, MotorType.kBrushless);
+    private final SparkMax rightMotor = new SparkMax(FeederConstants.kRightMotorId, MotorType.kBrushless);
 
     {
         leftMotor.configure(

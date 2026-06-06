@@ -49,14 +49,12 @@ public class RobotContainer {
     // https://gist.github.com/TheTripleV/4441f0e35e20b698f2ccd6e95be0fce8
     private final String songPath = "song.chrp"; // TODO change chrp file from current placeholder
 
-    private final CommandXboxController driverController =
-        new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
-    private final ArcadeDrive drive = drivetrain.new ArcadeDrive(
-        driverController
+    private final CommandXboxController driverController = new CommandXboxController(
+        OperatorConstants.kDriverControllerPort
     );
-    private final TurretPositionControl turnTurret =
-        turret.new TurretPositionControl(driverController);
+
+    private final ArcadeDrive drive = drivetrain.new ArcadeDrive(driverController);
+    private final TurretPositionControl turnTurret = turret.new TurretPositionControl(driverController);
 
     private final Trigger shootTrigger = driverController.leftBumper();
     private final Trigger intakeTrigger = driverController.leftTrigger();
@@ -99,18 +97,16 @@ public class RobotContainer {
      * joysticks}.
      */
     private void configureBindings() {
-        FluentTrigger.build()
+        new FluentTrigger.Builder()
             .bind(hoodUpTrigger, shooter.new AdjustHood(HoodState.UP))
-            .bind(hoodDownTrigger, shooter.new AdjustHood(HoodState.DOWN));
-        FluentTrigger.build()
-            .setDefault(shooter.new ControlSpin(ShooterState.IDLE))
+            .bind(hoodDownTrigger, shooter.new AdjustHood(HoodState.DOWN))
+            .build();
+        new FluentTrigger.Builder()
+            .defaultCommand(shooter.new ControlSpin(ShooterState.IDLE))
             .bind(shootTrigger, shooter.new ControlSpin(ShooterState.SHOOT))
-            .bind(
-                outtakeTrigger,
-                shooter.new ControlSpin(ShooterState.REVERSE)
-            );
-        FluentTrigger.build()
-            .setDefault(feeder.new ChangeState(FeederState.IDLE))
+            .bind(outtakeTrigger, shooter.new ControlSpin(ShooterState.REVERSE));
+        new FluentTrigger.Builder()
+            .defaultCommand(feeder.new ChangeState(FeederState.IDLE))
             .bind(intakeTrigger, feeder.new ChangeState(FeederState.INTAKE))
             .bind(outtakeTrigger, feeder.new ChangeState(FeederState.OUTTAKE));
         turretZeroTrigger.whileTrue(
@@ -122,12 +118,7 @@ public class RobotContainer {
                 .run(() ->
                     HIDRumble.rumble(
                         driverController,
-                        new RumbleRequest(
-                            RumbleType.kLeftRumble,
-                            RumbleConstants.kTurretZeroStrength,
-                            0.15,
-                            2
-                        )
+                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2)
                     )
                 )
         );
@@ -142,22 +133,13 @@ public class RobotContainer {
                     shooter.enableHoodReverseSoftLimit(false);
                     HIDRumble.rumble(
                         driverController,
-                        new RumbleRequest(
-                            RumbleType.kLeftRumble,
-                            RumbleConstants.kTurretZeroStrength,
-                            0.15,
-                            2
-                        )
+                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2)
                     );
                 })
                 .repeat(() ->
                     HIDRumble.rumble(
                         driverController,
-                        new RumbleRequest(
-                            RumbleType.kRightRumble,
-                            RumbleConstants.kHoodZeroStrength,
-                            2
-                        )
+                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kHoodZeroStrength, 2)
                     )
                 )
                 .onexit(interrupted -> shooter.enableHoodReverseSoftLimit(true))
