@@ -91,6 +91,7 @@ public class Shooter extends SubsystemBase {
 
     public void enableHoodReverseSoftLimit(boolean enabled) {
         var reverseConfig = new SparkMaxConfig();
+        ShooterConstants.kHoodMotorConfig.apply(reverseConfig);
         reverseConfig.softLimit.reverseSoftLimitEnabled(enabled);
         hoodMotor.configure(reverseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
