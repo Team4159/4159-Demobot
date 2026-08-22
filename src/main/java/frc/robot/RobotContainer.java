@@ -62,7 +62,6 @@ public class RobotContainer {
     private final Trigger hoodUpTrigger = driverController.rightBumper();
     private final Trigger hoodDownTrigger = driverController.rightTrigger();
     private final Trigger turretZeroTrigger = driverController.b();
-
     private final Trigger hoodZeroTrigger = driverController.y();
 
     /**
