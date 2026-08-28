@@ -15,10 +15,10 @@ import frc.robot.Constants.DrivetrainConstants;
 
 public class Drivetrain extends SubsystemBase {
 
-    private final TalonFX leftMotor1 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor1Id);
-    private final TalonFX leftMotor2 = new TalonFX(Constants.DrivetrainConstants.kLeftMotor2Id);
-    private final TalonFX rightMotor1 = new TalonFX(Constants.DrivetrainConstants.kRightMotor1Id);
-    private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.kRightMotor2Id);
+    private final TalonFX leftMotor1 = new TalonFX(Constants.DrivetrainConstants.LEFT_MOTOR_1_ID);
+    private final TalonFX leftMotor2 = new TalonFX(Constants.DrivetrainConstants.LEFT_MOTOR_2_ID);
+    private final TalonFX rightMotor1 = new TalonFX(Constants.DrivetrainConstants.RIGHT_MOTOR_1_ID);
+    private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.RIGHT_MOTOR_2_ID);
 
     {
         var leftMotorConfig = new MotorOutputConfigs()
@@ -43,8 +43,8 @@ public class Drivetrain extends SubsystemBase {
     public void drive(double leftSpeed, double rightSpeed) {
         leftSpeed = MathUtil.clamp(leftSpeed, -1, 1);
         rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
-        leftSpeed *= DrivetrainConstants.kSpeedScalar;
-        rightSpeed *= DrivetrainConstants.kSpeedScalar;
+        leftSpeed *= DrivetrainConstants.SPEED_FACTOR;
+        rightSpeed *= DrivetrainConstants.SPEED_FACTOR;
         leftMotor1.set(leftSpeed);
         leftMotor2.set(leftSpeed);
         rightMotor1.set(rightSpeed);
@@ -93,7 +93,7 @@ public class Drivetrain extends SubsystemBase {
             double inputY = controller.getLeftY();
             double forwardDirection = Math.signum(inputY);
             double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
-            double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.kInputDeadzone, 1);
+            double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.INPUT_DEADZONE, 1);
 
             // absolute angles
             double absoluteAngleFromHorizontal = Math.atan2(Math.abs(inputY), Math.abs(inputX));
@@ -103,18 +103,18 @@ public class Drivetrain extends SubsystemBase {
 
             double leftDirection = 0,
                 rightDirection = 0;
-            if (rawMagnitude >= ArcadeDriveConstants.kInputDeadzone) {
+            if (rawMagnitude >= ArcadeDriveConstants.INPUT_DEADZONE) {
                 double rotationAlpha;
-                if (absoluteAngleFromVertical <= ArcadeDriveConstants.kTranslationBufferAngle) {
+                if (absoluteAngleFromVertical <= ArcadeDriveConstants.TRANSLATION_BUFFER_ANGLE) {
                     rotationAlpha = forwardDirection;
-                } else if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.kRotationBufferAngle) {
+                } else if (absoluteAngleFromHorizontal <= ArcadeDriveConstants.ROTATION_BUFFER_ANGLE) {
                     rotationAlpha = 0;
                 } else {
                     // range of analog motion that is outside of the buffer zones
                     double analogRange =
                         Units.degreesToRadians(90) -
-                        (ArcadeDriveConstants.kRotationBufferAngle + ArcadeDriveConstants.kTranslationBufferAngle);
-                    double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.kRotationBufferAngle;
+                        (ArcadeDriveConstants.ROTATION_BUFFER_ANGLE + ArcadeDriveConstants.TRANSLATION_BUFFER_ANGLE);
+                    double relativeAngle = absoluteAngleFromHorizontal - ArcadeDriveConstants.ROTATION_BUFFER_ANGLE;
                     rotationAlpha = MathUtil.clamp(forwardDirection * (relativeAngle / analogRange), -1, 1);
                 }
 

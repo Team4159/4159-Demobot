@@ -27,30 +27,30 @@ public final class Constants {
 
     public static class OperatorConstants {
 
-        public static final int kDriverControllerPort = 0;
+        public static final int DRIVER_CONTROLLER_PORT = 0;
     }
 
     public static class ArcadeDriveConstants {
 
-        public static final double kTranslationBufferAngle = Units.degreesToRadians(15);
-        public static final double kRotationBufferAngle = Units.degreesToRadians(15);
-        public static final double kInputDeadzone = 0.3;
+        public static final double TRANSLATION_BUFFER_ANGLE = Units.degreesToRadians(15);
+        public static final double ROTATION_BUFFER_ANGLE = Units.degreesToRadians(15);
+        public static final double INPUT_DEADZONE = 0.3;
     }
 
     public static class DrivetrainConstants {
 
-        public static final int kLeftMotor1Id = 1;
-        public static final int kLeftMotor2Id = 4;
-        public static final int kRightMotor1Id = 3;
-        public static final int kRightMotor2Id = 2;
+        public static final int LEFT_MOTOR_1_ID = 1;
+        public static final int LEFT_MOTOR_2_ID = 4;
+        public static final int RIGHT_MOTOR_1_ID = 3;
+        public static final int RIGHT_MOTOR_2_ID = 2;
 
-        public static final double kSpeedScalar = 0.2;
+        public static final double SPEED_FACTOR = 0.2;
     }
 
     public static class FeederConstants {
 
-        public static final int kLeftMotorId = 1;
-        public static final int kRightMotorId = 2;
+        public static final int LEFT_MOTOR_ID = 1;
+        public static final int RIGHT_MOTOR_ID = 2;
 
         public static enum FeederState {
             IDLE(0),
@@ -67,74 +67,78 @@ public final class Constants {
 
     public static class TurretConstants {
 
-        public static final int kTurretMotorId = 9;
+        public static final int TURRET_MOTOR_ID = 9;
 
-        public static final double kInputDeadzone = 0.75;
-        public static final double kInputAngleScalar = 0.5;
-        public static final double kInputAngleJitterBuffer = Units.degreesToRadians(5);
+        public static final double INPUT_DEADZONE = 0.75;
+        public static final double INPUT_ANGLE_SCALAR = 0.5;
+        public static final double INPUT_ANGLE_JITTER_BUFFER = Units.degreesToRadians(5);
 
-        public static final double kTurretMotorGearRatio = 54.0;
+        public static final double TURRET_MOTOR_GEAR_RATIO = 54.0;
 
-        public static final double kTurretAngleMinimum = Units.degreesToRotations(-45);
-        public static final double kTurretAngleMaximum = Units.degreesToRotations(45);
-        public static final SparkMaxConfig kTurretMotorConfig = new SparkMaxConfig();
+        public static final double TURRET_ANGLE_MINIMUM = Units.degreesToRotations(-45);
+        public static final double TURRET_ANGLE_MAXIMUM = Units.degreesToRotations(45);
+        public static final SparkMaxConfig TURRET_MOTOR_CONFIG = new SparkMaxConfig();
 
         static {
-            kTurretMotorConfig.idleMode(IdleMode.kBrake).inverted(true);
-            kTurretMotorConfig.softLimit
+            TURRET_MOTOR_CONFIG.idleMode(IdleMode.kBrake).inverted(true);
+            TURRET_MOTOR_CONFIG.softLimit
                 .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(kTurretAngleMaximum * kTurretMotorGearRatio)
+                .forwardSoftLimit(TURRET_ANGLE_MAXIMUM * TURRET_MOTOR_GEAR_RATIO)
                 .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(kTurretAngleMinimum * kTurretMotorGearRatio);
+                .reverseSoftLimit(TURRET_ANGLE_MINIMUM * TURRET_MOTOR_GEAR_RATIO);
         }
 
-        public static final ProfiledPIDController kTurretProfiledPIDController = new ProfiledPIDController(
+        public static final ProfiledPIDController TURRET_PROFILED_PID_CONTROLLER = new ProfiledPIDController(
             0.4,
             0.0,
             0.02,
             new TrapezoidProfile.Constraints(30, 150)
         );
-        public static final SimpleMotorFeedforward kTurretFeedforward = new SimpleMotorFeedforward(0.05, 0.1, 0);
+        public static final SimpleMotorFeedforward TURRET_FORWARD = new SimpleMotorFeedforward(0.05, 0.1, 0);
     }
 
     public static class ShooterConstants {
 
         // IDs for all motors
-        public static final int kLeftShooterMotorId = 6;
-        public static final int kRightShooterMotorId = 5;
-        public static final int kHoodMotorId = 7;
+        public static final int LEFT_SHOOTER_MOTOR_ID = 6;
+        public static final int RIGHT_SHOOTER_MOTOR_ID = 5;
+        public static final int HOOD_MOTOR_ID = 7;
 
         // pid
-        public static final SparkMaxConfig kLeftShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(
+        public static final SparkMaxConfig LEFT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) new SparkMaxConfig().inverted(
             false
         );
-        public static final SparkMaxConfig kRightShooterMotorConfig = (SparkMaxConfig) new SparkMaxConfig().inverted(
+        public static final SparkMaxConfig RIGHT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) new SparkMaxConfig().inverted(
             true
         );
-        public static final ProfiledPIDController kShooterProfiledPIDController = new ProfiledPIDController(
+        public static final ProfiledPIDController SHOOTER_PROFILED_PID_CONTROLLER = new ProfiledPIDController(
             2.5,
             0,
             0,
             new TrapezoidProfile.Constraints(30, 60)
         );
 
+        // used the value for spinTolerance from FRC-2024
+        public static final double SPIN_GOAL_TOLERANCE = 5;
+
         static {
-            kShooterProfiledPIDController.setTolerance(ShooterConstants.kSpinTolerance);
+            SHOOTER_PROFILED_PID_CONTROLLER.setTolerance(ShooterConstants.SPIN_GOAL_TOLERANCE);
         }
 
         // hood angle ranges
-        public static final double kHoodAngleMinimum = Units.degreesToRotations(0);
-        public static final double kHoodAngleMaximum = Units.degreesToRotations(60);
-        public static final double kHoodGearRatio = 25.0; // does not affect offset
-        public static final SparkMaxConfig kHoodMotorConfig = new SparkMaxConfig();
+        public static final double HOOD_ANGLE_MINIMUM = Units.degreesToRotations(0);
+        public static final double HOOD_ANGLE_MAXIMUM = Units.degreesToRotations(60);
+        public static final double HOOD_GEAR_RATIO = 25.0; // does not affect offset
+        public static final SparkMaxConfig HOOD_MOTOR_CONFIG = new SparkMaxConfig();
 
         static {
-            kHoodMotorConfig.inverted(false);
-            kHoodMotorConfig.softLimit
+            HOOD_MOTOR_CONFIG.idleMode(IdleMode.kBrake);
+            HOOD_MOTOR_CONFIG.inverted(false);
+            HOOD_MOTOR_CONFIG.softLimit
                 .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(kHoodAngleMaximum * kHoodGearRatio)
+                .forwardSoftLimit(HOOD_ANGLE_MAXIMUM * HOOD_GEAR_RATIO)
                 .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(kHoodAngleMinimum * kHoodGearRatio);
+                .reverseSoftLimit(HOOD_ANGLE_MINIMUM * HOOD_GEAR_RATIO);
         }
 
         public static enum HoodState {
@@ -153,16 +157,7 @@ public final class Constants {
         // ----- tolerances: so if the motors/whatnot are a bit off, it'll still
         // work------
         // pitch refers to the angle
-        public static final double kPitchTolerance = Units.degreesToRotations(5);
-        // used the value for spinTolerance from FRC-2024
-        public static final double kSpinTolerance = 5;
-
-        // minimum and maximums for each.. because there are so many diff positions the
-        // shooter could be in. More
-        // efficient to have a range instead of set states
-        // REPLACE the values below with actual mins and maxes later (after testing).
-        public static final double kMinPitch = Units.degreesToRadians(14);
-        public static final double kMaxPitch = Units.rotationsToRadians(0.2);
+        public static final double HOOD_PITCH_TOLERANCE = Units.degreesToRotations(5);
 
         // ENUMS
         public static enum ShooterState {
@@ -180,9 +175,9 @@ public final class Constants {
 
     public static class RumbleConstants {
 
-        public static final double kTurretTurnStrength = 0.2;
-        public static final double kTurretTripStrength = 0.2;
-        public static final double kTurretZeroStrength = 0.5;
-        public static final double kHoodZeroStrength = 0.3;
+        public static final double TURRET_TURN_STRENGTH = 0.2;
+        public static final double TURRET_TRIP_STRENGTH = 0.2;
+        public static final double TURRET_ZERO_STRENGTH = 0.5;
+        public static final double HOOD_ZERO_STRENGTH = 0.3;
     }
 }

@@ -8,6 +8,8 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,9 +25,9 @@ public class Shooter extends SubsystemBase {
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.kLeftShooterMotorId, MotorType.kBrushless);
+    private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.LEFT_SHOOTER_MOTOR_ID, MotorType.kBrushless);
     private final SparkMax rightShooterMotor = new SparkMax(
-        ShooterConstants.kRightShooterMotorId,
+        ShooterConstants.RIGHT_SHOOTER_MOTOR_ID,
         MotorType.kBrushless
     );
 
@@ -43,11 +45,12 @@ public class Shooter extends SubsystemBase {
     }
 
     // one Neo 550
-    private final SparkMax hoodMotor = new SparkMax(ShooterConstants.kHoodMotorId, MotorType.kBrushless);
+    private final SparkMax hoodMotor = new SparkMax(ShooterConstants.HOOD_MOTOR_ID, MotorType.kBrushless);
+    private double lastHoodAngle = hoodMotor.getEncoder().getPosition();
 
     {
         hoodMotor.configure(
-            ShooterConstants.kHoodMotorConfig,
+            ShooterConstants.HOOD_MOTOR_CONFIG,
             ResetMode.kNoResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
@@ -62,9 +65,9 @@ public class Shooter extends SubsystemBase {
         // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
         // motorVoltage + " speed: " +
         // ShooterConstants.kShooterPIDController.getGoal().position);
-        if (ShooterConstants.kShooterProfiledPIDController.getGoal().position != 0.0) {
+        if (ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.getGoal().position != 0.0) {
             // motors should be at the same velocity because they are connected to the same axle
-            double motorVoltage = ShooterConstants.kShooterProfiledPIDController.calculate(
+            double motorVoltage = ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.calculate(
                 getAxleVelocity().in(RotationsPerSecond)
             );
             leftShooterMotor.setVoltage(motorVoltage);
@@ -73,35 +76,25 @@ public class Shooter extends SubsystemBase {
             leftShooterMotor.stopMotor();
             rightShooterMotor.stopMotor();
         }
+        // TODO: add code to preserve last hood angle with pid
     }
 
     public void setSpeed(double speed) {
-        ShooterConstants.kShooterProfiledPIDController.reset(getAxleVelocity().in(RotationsPerSecond));
+        ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.reset(getAxleVelocity().in(RotationsPerSecond));
         // System.out.println(speed);
-        ShooterConstants.kShooterProfiledPIDController.setGoal(speed);
+        ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.setGoal(speed);
     }
 
     public void adjustHood(double speed) {
         hoodMotor.set(speed);
     }
 
-    public void zeroHood() {
-        hoodMotor.getEncoder().setPosition(0.0);
-    }
-
-    public void enableHoodReverseSoftLimit(boolean enabled) {
-        var reverseConfig = new SparkMaxConfig();
-        ShooterConstants.kHoodMotorConfig.apply(reverseConfig);
-        reverseConfig.softLimit.reverseSoftLimitEnabled(enabled);
-        hoodMotor.configure(reverseConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    }
-
     public boolean isShooterReady() {
-        if (ShooterConstants.kShooterProfiledPIDController.getGoal().velocity <= 0) {
+        if (ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.getGoal().velocity <= 0) {
             // must be spinning in the positive direction to be shooting
             return false;
         }
-        return ShooterConstants.kShooterProfiledPIDController.atGoal();
+        return ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.atGoal();
     }
 
     private AngularVelocity getAxleVelocity() {
@@ -127,6 +120,7 @@ public class Shooter extends SubsystemBase {
 
         @Override
         public void execute() {
+            lastHoodAngle = hoodMotor.getEncoder().getPosition();
             adjustHood(state.speed);
         }
 

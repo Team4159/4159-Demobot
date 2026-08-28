@@ -17,11 +17,11 @@ import frc.robot.Constants.TurretConstants;
 
 public class Turret extends SubsystemBase {
 
-    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.kTurretMotorId, MotorType.kBrushless);
+    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.TURRET_MOTOR_ID, MotorType.kBrushless);
 
     {
         turretMotor.configure(
-            TurretConstants.kTurretMotorConfig,
+            TurretConstants.TURRET_MOTOR_CONFIG,
             ResetMode.kNoResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
@@ -47,7 +47,7 @@ public class Turret extends SubsystemBase {
             turretSetpoint = 0;
             previousTurretSetpointWithinRange = false;
             previousWantedTurretSetpoint = turretSetpoint;
-            TurretConstants.kTurretProfiledPIDController.reset(turretMotor.getEncoder().getPosition());
+            TurretConstants.TURRET_PROFILED_PID_CONTROLLER.reset(turretMotor.getEncoder().getPosition());
         }
 
         @Override
@@ -56,60 +56,60 @@ public class Turret extends SubsystemBase {
             double inputY = controller.getRightY();
             double magnitude = Math.hypot(inputX, inputY);
 
-            if (magnitude >= TurretConstants.kInputDeadzone) {
+            if (magnitude >= TurretConstants.INPUT_DEADZONE) {
                 double inputAngle = Math.atan2(inputY, inputX);
-                double lastInputAngle = turretSetpoint / TurretConstants.kInputAngleScalar;
+                double lastInputAngle = turretSetpoint / TurretConstants.INPUT_ANGLE_SCALAR;
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
                 double desiredAngle =
-                    Math.abs(inputAngle - lastInputAngle) >= TurretConstants.kInputAngleJitterBuffer
+                    Math.abs(inputAngle - lastInputAngle) >= TurretConstants.INPUT_ANGLE_JITTER_BUFFER
                         ? inputAngle
                         : lastInputAngle;
                 double wantedTurretSetpoint = Units.radiansToRotations(
-                    TurretConstants.kInputAngleScalar *
+                    TurretConstants.INPUT_ANGLE_SCALAR *
                         (((desiredAngle + Units.degreesToRadians(90) + Units.degreesToRadians(180)) %
                                 Units.degreesToRadians(360)) - Units.degreesToRadians(180))
                 );
                 boolean turretSetpointWithinRange =
-                    wantedTurretSetpoint >= TurretConstants.kTurretAngleMinimum &&
-                    wantedTurretSetpoint <= TurretConstants.kTurretAngleMaximum;
+                    wantedTurretSetpoint >= TurretConstants.TURRET_ANGLE_MINIMUM &&
+                    wantedTurretSetpoint <= TurretConstants.TURRET_ANGLE_MAXIMUM;
 
                 // convert turret position to rotations
                 if (turretSetpointWithinRange) {
                     turretSetpoint = wantedTurretSetpoint;
                     HIDRumble.rumble(
                         controller,
-                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretTurnStrength, 0)
+                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.TURRET_TURN_STRENGTH, 0)
                     );
                 } else if (previousTurretSetpointWithinRange) {
                     if (previousWantedTurretSetpoint > 0) {
-                        turretSetpoint = TurretConstants.kTurretAngleMaximum;
+                        turretSetpoint = TurretConstants.TURRET_ANGLE_MAXIMUM;
                     } else {
-                        turretSetpoint = TurretConstants.kTurretAngleMinimum;
+                        turretSetpoint = TurretConstants.TURRET_ANGLE_MINIMUM;
                     }
                     HIDRumble.rumble(
                         controller,
-                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kTurretTripStrength, 0.3, 0)
+                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.TURRET_TRIP_STRENGTH, 0.3, 0)
                     );
                 }
                 previousTurretSetpointWithinRange = turretSetpointWithinRange;
                 previousWantedTurretSetpoint = wantedTurretSetpoint;
             }
 
-            double motorSetpoint = turretSetpoint * TurretConstants.kTurretMotorGearRatio;
-            double pidVoltage = TurretConstants.kTurretProfiledPIDController.calculate(
+            double motorSetpoint = turretSetpoint * TurretConstants.TURRET_MOTOR_GEAR_RATIO;
+            double pidVoltage = TurretConstants.TURRET_PROFILED_PID_CONTROLLER.calculate(
                 turretMotor.getEncoder().getPosition(),
                 motorSetpoint
             );
-            double feedforwardVoltage = TurretConstants.kTurretFeedforward.calculate(
-                TurretConstants.kTurretProfiledPIDController.getSetpoint().velocity
+            double feedforwardVoltage = TurretConstants.TURRET_FORWARD.calculate(
+                TurretConstants.TURRET_PROFILED_PID_CONTROLLER.getSetpoint().velocity
             );
             turretMotor.set((pidVoltage + feedforwardVoltage) / 12.0);
         }
 
         public void zeroTurret() {
             turretSetpoint = 0;
-            TurretConstants.kTurretProfiledPIDController.reset(0);
+            TurretConstants.TURRET_PROFILED_PID_CONTROLLER.reset(0);
             turretMotor.getEncoder().setPosition(0);
             turretMotor.set(0);
         }

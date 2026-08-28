@@ -47,10 +47,10 @@ public class RobotContainer {
 
     // Generate chrp files with Pheonix Tuner X or
     // https://gist.github.com/TheTripleV/4441f0e35e20b698f2ccd6e95be0fce8
-    private final String songPath = "song.chrp"; // TODO change chrp file from current placeholder
+    private final String songPath = "song.chrp";
 
     private final CommandXboxController driverController = new CommandXboxController(
-        OperatorConstants.kDriverControllerPort
+        OperatorConstants.DRIVER_CONTROLLER_PORT
     );
 
     private final ArcadeDrive drive = drivetrain.new ArcadeDrive(driverController);
@@ -62,7 +62,6 @@ public class RobotContainer {
     private final Trigger hoodUpTrigger = driverController.rightBumper();
     private final Trigger hoodDownTrigger = driverController.rightTrigger();
     private final Trigger turretZeroTrigger = driverController.b();
-    private final Trigger hoodZeroTrigger = driverController.y();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -119,33 +118,9 @@ public class RobotContainer {
                 .run(() ->
                     HIDRumble.rumble(
                         driverController,
-                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2)
+                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.TURRET_ZERO_STRENGTH, 0.15, 2)
                     )
                 )
-        );
-        hoodZeroTrigger.whileTrue(
-            new Orchestrator()
-                .run(() -> orchestra.stop())
-                .yield(3)
-                .run(() -> orchestra.play())
-                .require(shooter)
-                .command(shooter.new AdjustHood(HoodState.DOWN_SLOW))
-                .run(() -> {
-                    shooter.enableHoodReverseSoftLimit(false);
-                    HIDRumble.rumble(
-                        driverController,
-                        new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.kTurretZeroStrength, 0.15, 2)
-                    );
-                })
-                .repeat(() ->
-                    HIDRumble.rumble(
-                        driverController,
-                        new RumbleRequest(RumbleType.kRightRumble, RumbleConstants.kHoodZeroStrength, 2)
-                    )
-                )
-                .onexit(interrupted -> shooter.enableHoodReverseSoftLimit(true))
-                .yield(5)
-                .exit()
         );
     }
 
