@@ -8,8 +8,6 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,7 +23,10 @@ public class Shooter extends SubsystemBase {
      * the adjustable hood. Neo motors use the revlib library.
      */
     // two Neos
-    private final SparkMax leftShooterMotor = new SparkMax(ShooterConstants.LEFT_SHOOTER_MOTOR_ID, MotorType.kBrushless);
+    private final SparkMax leftShooterMotor = new SparkMax(
+        ShooterConstants.LEFT_SHOOTER_MOTOR_ID,
+        MotorType.kBrushless
+    );
     private final SparkMax rightShooterMotor = new SparkMax(
         ShooterConstants.RIGHT_SHOOTER_MOTOR_ID,
         MotorType.kBrushless
@@ -62,11 +63,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // System.out.println("axlevelocity: " + axleVelocity + " motorVoltage: " +
-        // motorVoltage + " speed: " +
-        // ShooterConstants.kShooterPIDController.getGoal().position);
         if (ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.getGoal().position != 0.0) {
-            // motors should be at the same velocity because they are connected to the same axle
             double motorVoltage = ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.calculate(
                 getAxleVelocity().in(RotationsPerSecond)
             );
@@ -81,7 +78,6 @@ public class Shooter extends SubsystemBase {
 
     public void setSpeed(double speed) {
         ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.reset(getAxleVelocity().in(RotationsPerSecond));
-        // System.out.println(speed);
         ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.setGoal(speed);
     }
 

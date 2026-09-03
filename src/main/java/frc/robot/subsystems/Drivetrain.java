@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,10 +42,6 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void drive(double leftSpeed, double rightSpeed) {
-        leftSpeed = MathUtil.clamp(leftSpeed, -1, 1);
-        rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
-        leftSpeed *= DrivetrainConstants.SPEED_FACTOR;
-        rightSpeed *= DrivetrainConstants.SPEED_FACTOR;
         leftMotor1.set(leftSpeed);
         leftMotor2.set(leftSpeed);
         rightMotor1.set(rightSpeed);
@@ -60,7 +57,7 @@ public class Drivetrain extends SubsystemBase {
 
     public class TankDrive extends Command {
 
-        private CommandXboxController controller;
+        private final CommandXboxController controller;
 
         public TankDrive(CommandXboxController controller) {
             this.controller = controller;
@@ -69,7 +66,10 @@ public class Drivetrain extends SubsystemBase {
 
         @Override
         public void execute() {
-            Drivetrain.this.drive(controller.getLeftY(), controller.getRightY());
+            Drivetrain.this.drive(
+                controller.getLeftY() * DrivetrainConstants.SPEED_FACTOR,
+                controller.getRightY() * DrivetrainConstants.SPEED_FACTOR
+            );
         }
 
         @Override
@@ -80,7 +80,7 @@ public class Drivetrain extends SubsystemBase {
 
     public class ArcadeDrive extends Command {
 
-        private CommandXboxController controller;
+        private final CommandXboxController controller;
 
         public ArcadeDrive(CommandXboxController controller) {
             this.controller = controller;
@@ -89,8 +89,19 @@ public class Drivetrain extends SubsystemBase {
 
         @Override
         public void execute() {
-            double inputX = controller.getLeftX();
-            double inputY = controller.getLeftY();
+            Pair<Double, Double> speeds = getSpeeds(controller.getLeftX(), controller.getLeftY());
+            Drivetrain.this.drive(
+                speeds.getFirst() * DrivetrainConstants.SPEED_FACTOR,
+                speeds.getSecond() * DrivetrainConstants.SPEED_FACTOR
+            );
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            Drivetrain.this.stop();
+        }
+
+        private Pair<Double, Double> getSpeeds(double inputX, double inputY) {
             double forwardDirection = Math.signum(inputY);
             double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
             double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.INPUT_DEADZONE, 1);
@@ -123,7 +134,7 @@ public class Drivetrain extends SubsystemBase {
                 // 0 to -90 degrees: lerp from (-1, 1) to (1, 1)
                 leftDirection = -1 + Math.max(0, rotationAlpha * 2);
                 leftDirection = MathUtil.clamp(leftDirection, -1, 1);
-                rightDirection = -1 + ((rotationAlpha + 1) * 2);
+                rightDirection = -1 + (rotationAlpha + 1) * 2;
                 rightDirection = MathUtil.clamp(rightDirection, -1, 1);
 
                 // reverse inputs if the input is leftward
@@ -140,12 +151,7 @@ public class Drivetrain extends SubsystemBase {
             double rightSpeed = rightDirection * correctedMagnitude;
             rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
 
-            Drivetrain.this.drive(leftSpeed, rightSpeed);
-        }
-
-        @Override
-        public void end(boolean interrupted) {
-            Drivetrain.this.stop();
+            return Pair.of(leftSpeed, rightSpeed);
         }
     }
 }
