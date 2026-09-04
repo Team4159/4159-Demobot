@@ -72,10 +72,25 @@ public final class Constants {
         public static final int LEFT_MOTOR_ID = 1;
         public static final int RIGHT_MOTOR_ID = 2;
 
+        public static final SparkMaxConfig FEEDER_MOTOR_CONFIG = new SparkMaxConfig();
+        public static final SparkMaxConfig LEFT_FEEDER_MOTOR_CONFIG, RIGHT_FEEDER_MOTOR_CONFIG;
+
+        static {
+            FEEDER_MOTOR_CONFIG.smartCurrentLimit(15);
+            FEEDER_MOTOR_CONFIG.secondaryCurrentLimit(60);
+            FEEDER_MOTOR_CONFIG.idleMode(IdleMode.kCoast);
+            LEFT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
+                false
+            );
+            RIGHT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
+                true
+            );
+        }
+
         public static enum FeederState {
-            IDLE(0),
+            IDLE(0.0),
             INTAKE(0.5),
-            OUTTAKE(-0.15);
+            OUTTAKE(-0.25);
 
             public final double dutyCycle;
 

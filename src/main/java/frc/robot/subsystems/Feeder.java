@@ -4,7 +4,6 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FeederConstants;
@@ -17,12 +16,12 @@ public class Feeder extends SubsystemBase {
 
     {
         leftMotor.configure(
-            new SparkMaxConfig().inverted(false),
+            FeederConstants.LEFT_FEEDER_MOTOR_CONFIG,
             ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
         rightMotor.configure(
-            new SparkMaxConfig().inverted(true),
+            FeederConstants.RIGHT_FEEDER_MOTOR_CONFIG,
             ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
