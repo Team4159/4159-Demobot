@@ -7,6 +7,9 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -49,6 +52,19 @@ public final class Constants {
         public static final int LEFT_MOTOR_2_ID = 4;
         public static final int RIGHT_MOTOR_1_ID = 3;
         public static final int RIGHT_MOTOR_2_ID = 2;
+
+        public static final TalonFXConfiguration DRIVETRAIN_MOTOR_CONFIG = new TalonFXConfiguration();
+        public static final TalonFXConfiguration DRIVETRAIN_LEFT_MOTOR_CONFIG, DRIVETRAIN_RIGHT_MOTOR_CONFIG;
+
+        static {
+            DRIVETRAIN_MOTOR_CONFIG.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
+            DRIVETRAIN_MOTOR_CONFIG.CurrentLimits.withStatorCurrentLimit(80).withSupplyCurrentLimit(40);
+
+            DRIVETRAIN_LEFT_MOTOR_CONFIG = DRIVETRAIN_MOTOR_CONFIG.clone();
+            DRIVETRAIN_LEFT_MOTOR_CONFIG.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
+            DRIVETRAIN_RIGHT_MOTOR_CONFIG = DRIVETRAIN_MOTOR_CONFIG.clone();
+            DRIVETRAIN_RIGHT_MOTOR_CONFIG.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+        }
     }
 
     public static class FeederConstants {

@@ -1,9 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.util.Units;
@@ -22,17 +19,10 @@ public class Drivetrain extends SubsystemBase {
     private final TalonFX rightMotor2 = new TalonFX(DrivetrainConstants.RIGHT_MOTOR_2_ID);
 
     {
-        var leftMotorConfig = new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake);
-        leftMotor1.getConfigurator().apply(leftMotorConfig);
-        leftMotor2.getConfigurator().apply(leftMotorConfig);
-
-        var rightMotorConfig = new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake);
-        rightMotor1.getConfigurator().apply(rightMotorConfig);
-        rightMotor2.getConfigurator().apply(rightMotorConfig);
+        leftMotor1.getConfigurator().apply(DrivetrainConstants.DRIVETRAIN_LEFT_MOTOR_CONFIG);
+        leftMotor2.getConfigurator().apply(DrivetrainConstants.DRIVETRAIN_LEFT_MOTOR_CONFIG);
+        rightMotor1.getConfigurator().apply(DrivetrainConstants.DRIVETRAIN_RIGHT_MOTOR_CONFIG);
+        rightMotor2.getConfigurator().apply(DrivetrainConstants.DRIVETRAIN_RIGHT_MOTOR_CONFIG);
     }
 
     public Drivetrain() {}
