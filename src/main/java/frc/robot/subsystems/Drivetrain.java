@@ -10,16 +10,16 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants;
 import frc.robot.Constants.ArcadeDriveConstants;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Constants.OperatorConstants;
 
 public class Drivetrain extends SubsystemBase {
 
-    private final TalonFX leftMotor1 = new TalonFX(Constants.DrivetrainConstants.LEFT_MOTOR_1_ID);
-    private final TalonFX leftMotor2 = new TalonFX(Constants.DrivetrainConstants.LEFT_MOTOR_2_ID);
-    private final TalonFX rightMotor1 = new TalonFX(Constants.DrivetrainConstants.RIGHT_MOTOR_1_ID);
-    private final TalonFX rightMotor2 = new TalonFX(Constants.DrivetrainConstants.RIGHT_MOTOR_2_ID);
+    private final TalonFX leftMotor1 = new TalonFX(DrivetrainConstants.LEFT_MOTOR_1_ID);
+    private final TalonFX leftMotor2 = new TalonFX(DrivetrainConstants.LEFT_MOTOR_2_ID);
+    private final TalonFX rightMotor1 = new TalonFX(DrivetrainConstants.RIGHT_MOTOR_1_ID);
+    private final TalonFX rightMotor2 = new TalonFX(DrivetrainConstants.RIGHT_MOTOR_2_ID);
 
     {
         var leftMotorConfig = new MotorOutputConfigs()
@@ -41,11 +41,11 @@ public class Drivetrain extends SubsystemBase {
         return new TalonFX[] { leftMotor1, leftMotor2, rightMotor1, rightMotor2 };
     }
 
-    public void drive(double leftSpeed, double rightSpeed) {
-        leftMotor1.set(leftSpeed);
-        leftMotor2.set(leftSpeed);
-        rightMotor1.set(rightSpeed);
-        rightMotor2.set(rightSpeed);
+    public void drive(double leftVelocity, double rightVelocity) {
+        leftMotor1.set(leftVelocity);
+        leftMotor2.set(leftVelocity);
+        rightMotor1.set(rightVelocity);
+        rightMotor2.set(rightVelocity);
     }
 
     public void stop() {
@@ -67,8 +67,8 @@ public class Drivetrain extends SubsystemBase {
         @Override
         public void execute() {
             Drivetrain.this.drive(
-                controller.getLeftY() * DrivetrainConstants.SPEED_FACTOR,
-                controller.getRightY() * DrivetrainConstants.SPEED_FACTOR
+                controller.getLeftY() * OperatorConstants.DRIVETRAIN_VELOCITY_FACTOR,
+                controller.getRightY() * OperatorConstants.DRIVETRAIN_VELOCITY_FACTOR
             );
         }
 
@@ -89,10 +89,10 @@ public class Drivetrain extends SubsystemBase {
 
         @Override
         public void execute() {
-            Pair<Double, Double> speeds = getSpeeds(controller.getLeftX(), controller.getLeftY());
+            Pair<Double, Double> velocities = getVelocities(controller.getLeftX(), controller.getLeftY());
             Drivetrain.this.drive(
-                speeds.getFirst() * DrivetrainConstants.SPEED_FACTOR,
-                speeds.getSecond() * DrivetrainConstants.SPEED_FACTOR
+                velocities.getFirst() * OperatorConstants.DRIVETRAIN_VELOCITY_FACTOR,
+                velocities.getSecond() * OperatorConstants.DRIVETRAIN_VELOCITY_FACTOR
             );
         }
 
@@ -101,7 +101,7 @@ public class Drivetrain extends SubsystemBase {
             Drivetrain.this.stop();
         }
 
-        private Pair<Double, Double> getSpeeds(double inputX, double inputY) {
+        private Pair<Double, Double> getVelocities(double inputX, double inputY) {
             double forwardDirection = Math.signum(inputY);
             double rawMagnitude = Math.min(1, Math.hypot(inputX, inputY));
             double correctedMagnitude = MathUtil.applyDeadband(rawMagnitude, ArcadeDriveConstants.INPUT_DEADZONE, 1);
@@ -145,13 +145,13 @@ public class Drivetrain extends SubsystemBase {
                 }
             }
 
-            // get speeds based off direction and input magnitude
-            double leftSpeed = leftDirection * correctedMagnitude;
-            leftSpeed = MathUtil.clamp(leftSpeed, -1, 1);
-            double rightSpeed = rightDirection * correctedMagnitude;
-            rightSpeed = MathUtil.clamp(rightSpeed, -1, 1);
+            // get velocities based off direction and input magnitude
+            double leftVelocity = leftDirection * correctedMagnitude;
+            leftVelocity = MathUtil.clamp(leftVelocity, -1, 1);
+            double rightVelocity = rightDirection * correctedMagnitude;
+            rightVelocity = MathUtil.clamp(rightVelocity, -1, 1);
 
-            return Pair.of(leftSpeed, rightSpeed);
+            return Pair.of(leftVelocity, rightVelocity);
         }
     }
 }

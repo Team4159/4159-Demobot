@@ -18,12 +18,12 @@ public class Feeder extends SubsystemBase {
     {
         leftMotor.configure(
             new SparkMaxConfig().inverted(false),
-            ResetMode.kNoResetSafeParameters,
+            ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
         rightMotor.configure(
             new SparkMaxConfig().inverted(true),
-            ResetMode.kNoResetSafeParameters,
+            ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
     }
@@ -31,8 +31,8 @@ public class Feeder extends SubsystemBase {
     public Feeder() {}
 
     public void setState(FeederState state) {
-        leftMotor.set(state.speed);
-        rightMotor.set(state.speed);
+        leftMotor.set(state.dutyCycle);
+        rightMotor.set(state.dutyCycle);
     }
 
     public class ChangeState extends Command {

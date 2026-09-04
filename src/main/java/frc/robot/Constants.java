@@ -4,12 +4,17 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
+
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -28,6 +33,7 @@ public final class Constants {
     public static class OperatorConstants {
 
         public static final int DRIVER_CONTROLLER_PORT = 0;
+        public static final double DRIVETRAIN_VELOCITY_FACTOR = 0.2;
     }
 
     public static class ArcadeDriveConstants {
@@ -43,8 +49,6 @@ public final class Constants {
         public static final int LEFT_MOTOR_2_ID = 4;
         public static final int RIGHT_MOTOR_1_ID = 3;
         public static final int RIGHT_MOTOR_2_ID = 2;
-
-        public static final double SPEED_FACTOR = 0.2;
     }
 
     public static class FeederConstants {
@@ -57,10 +61,10 @@ public final class Constants {
             INTAKE(0.5),
             OUTTAKE(-0.15);
 
-            public final double speed;
+            public final double dutyCycle;
 
-            private FeederState(double speed) {
-                this.speed = speed;
+            private FeederState(double dutyCycle) {
+                this.dutyCycle = dutyCycle;
             }
         }
     }
@@ -71,21 +75,20 @@ public final class Constants {
 
         public static final double INPUT_DEADZONE = 0.75;
         public static final double INPUT_ANGLE_SCALAR = 0.5;
-        public static final double INPUT_ANGLE_JITTER_BUFFER = Units.degreesToRadians(5);
+        public static final double INPUT_ANGLE_JITTER_BUFFER = Units.degreesToRadians(1);
 
         public static final double TURRET_MOTOR_GEAR_RATIO = 54.0;
 
-        public static final double TURRET_ANGLE_MINIMUM = Units.degreesToRotations(-45);
-        public static final double TURRET_ANGLE_MAXIMUM = Units.degreesToRotations(45);
+        public static final Angle TURRET_ANGLE_MINIMUM = Degrees.of(-45);
+        public static final Angle TURRET_ANGLE_MAXIMUM = Degrees.of(45);
+
         public static final SparkMaxConfig TURRET_MOTOR_CONFIG = new SparkMaxConfig();
 
         static {
-            TURRET_MOTOR_CONFIG.idleMode(IdleMode.kBrake).inverted(true);
-            TURRET_MOTOR_CONFIG.softLimit
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(TURRET_ANGLE_MAXIMUM * TURRET_MOTOR_GEAR_RATIO)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(TURRET_ANGLE_MINIMUM * TURRET_MOTOR_GEAR_RATIO);
+            TURRET_MOTOR_CONFIG.smartCurrentLimit(40);
+            TURRET_MOTOR_CONFIG.secondaryCurrentLimit(50);
+            TURRET_MOTOR_CONFIG.idleMode(IdleMode.kBrake);
+            TURRET_MOTOR_CONFIG.inverted(true);
         }
 
         public static final ProfiledPIDController TURRET_PROFILED_PID_CONTROLLER = new ProfiledPIDController(
@@ -94,7 +97,7 @@ public final class Constants {
             0.02,
             new TrapezoidProfile.Constraints(30, 150)
         );
-        public static final SimpleMotorFeedforward TURRET_FORWARD = new SimpleMotorFeedforward(0.05, 0.1, 0);
+        public static final SimpleMotorFeedforward TURRET_FEED_FORWARD = new SimpleMotorFeedforward(0.05, 0.1, 0);
     }
 
     public static class ShooterConstants {
@@ -105,12 +108,21 @@ public final class Constants {
         public static final int HOOD_MOTOR_ID = 7;
 
         // pid
-        public static final SparkMaxConfig LEFT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) new SparkMaxConfig().inverted(
-            false
-        );
-        public static final SparkMaxConfig RIGHT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) new SparkMaxConfig().inverted(
-            true
-        );
+        public static final SparkMaxConfig SHOOTER_MOTOR_CONFIG = new SparkMaxConfig();
+        public static final SparkMaxConfig LEFT_SHOOTER_MOTOR_CONFIG, RIGHT_SHOOTER_MOTOR_CONFIG;
+
+        static {
+            SHOOTER_MOTOR_CONFIG.smartCurrentLimit(40);
+            SHOOTER_MOTOR_CONFIG.secondaryCurrentLimit(80);
+            SHOOTER_MOTOR_CONFIG.idleMode(IdleMode.kCoast);
+            LEFT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) SHOOTER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
+                false
+            );
+            RIGHT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) SHOOTER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
+                true
+            );
+        }
+
         public static final ProfiledPIDController SHOOTER_PROFILED_PID_CONTROLLER = new ProfiledPIDController(
             2.5,
             0,
@@ -126,19 +138,15 @@ public final class Constants {
         }
 
         // hood angle ranges
-        public static final double HOOD_ANGLE_MINIMUM = Units.degreesToRotations(0);
-        public static final double HOOD_ANGLE_MAXIMUM = Units.degreesToRotations(60);
-        public static final double HOOD_GEAR_RATIO = 25.0; // does not affect offset
+        public static final double HOOD_GEAR_RATIO = 25.0;
+
         public static final SparkMaxConfig HOOD_MOTOR_CONFIG = new SparkMaxConfig();
 
         static {
-            HOOD_MOTOR_CONFIG.idleMode(IdleMode.kBrake);
+            HOOD_MOTOR_CONFIG.smartCurrentLimit(15);
+            HOOD_MOTOR_CONFIG.secondaryCurrentLimit(40);
+            HOOD_MOTOR_CONFIG.idleMode(IdleMode.kCoast);
             HOOD_MOTOR_CONFIG.inverted(false);
-            HOOD_MOTOR_CONFIG.softLimit
-                .forwardSoftLimitEnabled(true)
-                .forwardSoftLimit(HOOD_ANGLE_MAXIMUM * HOOD_GEAR_RATIO)
-                .reverseSoftLimitEnabled(true)
-                .reverseSoftLimit(HOOD_ANGLE_MINIMUM * HOOD_GEAR_RATIO);
         }
 
         public static enum HoodState {
@@ -147,10 +155,10 @@ public final class Constants {
             DOWN(-0.5),
             DOWN_SLOW(-0.25);
 
-            public final double speed;
+            public final double dutyCycle;
 
-            private HoodState(double speed) {
-                this.speed = speed;
+            private HoodState(double dutyCycle) {
+                this.dutyCycle = dutyCycle;
             }
         }
 
@@ -161,14 +169,14 @@ public final class Constants {
 
         // ENUMS
         public static enum ShooterState {
-            IDLE(0),
-            SHOOT(100),
-            REVERSE(-25);
+            IDLE(RPM.of(0.0)),
+            SHOOT(RPM.of(5000.0)),
+            REVERSE(RPM.of(-225.0));
 
-            public final double speed;
+            public final AngularVelocity velocity;
 
-            private ShooterState(double speed) {
-                this.speed = speed;
+            private ShooterState(AngularVelocity velocity) {
+                this.velocity = velocity;
             }
         }
     }

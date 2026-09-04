@@ -1,28 +1,31 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.HIDRumble;
 import frc.lib.HIDRumble.RumbleRequest;
-import frc.robot.Constants;
 import frc.robot.Constants.RumbleConstants;
 import frc.robot.Constants.TurretConstants;
 
 public class Turret extends SubsystemBase {
 
-    private final SparkMax turretMotor = new SparkMax(Constants.TurretConstants.TURRET_MOTOR_ID, MotorType.kBrushless);
+    private final SparkMax turretMotor = new SparkMax(TurretConstants.TURRET_MOTOR_ID, MotorType.kBrushless);
 
     {
         turretMotor.configure(
             TurretConstants.TURRET_MOTOR_CONFIG,
-            ResetMode.kNoResetSafeParameters,
+            ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
     }
@@ -32,10 +35,10 @@ public class Turret extends SubsystemBase {
     public class TurretPositionControl extends Command {
 
         private final CommandXboxController controller;
-        private double turretSetpoint;
+        private Angle turretSetpoint;
 
         private boolean previousTurretSetpointWithinRange;
-        private double previousWantedTurretSetpoint;
+        private Angle previousWantedTurretSetpoint;
 
         public TurretPositionControl(CommandXboxController controller) {
             this.controller = controller;
@@ -44,7 +47,7 @@ public class Turret extends SubsystemBase {
 
         @Override
         public void initialize() {
-            turretSetpoint = 0;
+            turretSetpoint = Rotations.of(0.0);
             previousTurretSetpointWithinRange = false;
             previousWantedTurretSetpoint = turretSetpoint;
             TurretConstants.TURRET_PROFILED_PID_CONTROLLER.reset(turretMotor.getEncoder().getPosition());
@@ -58,21 +61,22 @@ public class Turret extends SubsystemBase {
 
             if (magnitude >= TurretConstants.INPUT_DEADZONE) {
                 double inputAngle = Math.atan2(inputY, inputX);
-                double lastInputAngle = turretSetpoint / TurretConstants.INPUT_ANGLE_SCALAR;
+                double lastInputAngle = turretSetpoint.in(Rotations) / TurretConstants.INPUT_ANGLE_SCALAR;
                 // normalizes angle while scaling
                 // note: negative 90 degrees is up
                 double desiredAngle =
                     Math.abs(inputAngle - lastInputAngle) >= TurretConstants.INPUT_ANGLE_JITTER_BUFFER
                         ? inputAngle
                         : lastInputAngle;
-                double wantedTurretSetpoint = Units.radiansToRotations(
+                Angle wantedTurretSetpoint = Radians.of(
                     TurretConstants.INPUT_ANGLE_SCALAR *
                         (((desiredAngle + Units.degreesToRadians(90) + Units.degreesToRadians(180)) %
-                                Units.degreesToRadians(360)) - Units.degreesToRadians(180))
+                            Units.degreesToRadians(360)) -
+                            Units.degreesToRadians(180))
                 );
                 boolean turretSetpointWithinRange =
-                    wantedTurretSetpoint >= TurretConstants.TURRET_ANGLE_MINIMUM &&
-                    wantedTurretSetpoint <= TurretConstants.TURRET_ANGLE_MAXIMUM;
+                    wantedTurretSetpoint.compareTo(TurretConstants.TURRET_ANGLE_MINIMUM) >= 0 &&
+                    wantedTurretSetpoint.compareTo(TurretConstants.TURRET_ANGLE_MAXIMUM) <= 0;
 
                 // convert turret position to rotations
                 if (turretSetpointWithinRange) {
@@ -82,7 +86,7 @@ public class Turret extends SubsystemBase {
                         new RumbleRequest(RumbleType.kLeftRumble, RumbleConstants.TURRET_TURN_STRENGTH, 0)
                     );
                 } else if (previousTurretSetpointWithinRange) {
-                    if (previousWantedTurretSetpoint > 0) {
+                    if (previousWantedTurretSetpoint.magnitude() > 0) {
                         turretSetpoint = TurretConstants.TURRET_ANGLE_MAXIMUM;
                     } else {
                         turretSetpoint = TurretConstants.TURRET_ANGLE_MINIMUM;
@@ -96,22 +100,22 @@ public class Turret extends SubsystemBase {
                 previousWantedTurretSetpoint = wantedTurretSetpoint;
             }
 
-            double motorSetpoint = turretSetpoint * TurretConstants.TURRET_MOTOR_GEAR_RATIO;
+            double motorSetpoint = turretSetpoint.in(Rotations) * TurretConstants.TURRET_MOTOR_GEAR_RATIO;
             double pidVoltage = TurretConstants.TURRET_PROFILED_PID_CONTROLLER.calculate(
                 turretMotor.getEncoder().getPosition(),
                 motorSetpoint
             );
-            double feedforwardVoltage = TurretConstants.TURRET_FORWARD.calculate(
+            double feedforwardVoltage = TurretConstants.TURRET_FEED_FORWARD.calculate(
                 TurretConstants.TURRET_PROFILED_PID_CONTROLLER.getSetpoint().velocity
             );
             turretMotor.set((pidVoltage + feedforwardVoltage) / 12.0);
         }
 
         public void zeroTurret() {
-            turretSetpoint = 0;
-            TurretConstants.TURRET_PROFILED_PID_CONTROLLER.reset(0);
-            turretMotor.getEncoder().setPosition(0);
-            turretMotor.set(0);
+            turretMotor.set(0.0);
+            turretSetpoint = Rotations.of(0.0);
+            TurretConstants.TURRET_PROFILED_PID_CONTROLLER.reset(0.0);
+            turretMotor.getEncoder().setPosition(0.0);
         }
     }
 }

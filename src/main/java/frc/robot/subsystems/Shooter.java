@@ -7,7 +7,6 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,13 +33,13 @@ public class Shooter extends SubsystemBase {
 
     {
         leftShooterMotor.configure(
-            new SparkMaxConfig().inverted(false),
-            ResetMode.kNoResetSafeParameters,
+            ShooterConstants.LEFT_SHOOTER_MOTOR_CONFIG,
+            ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
         rightShooterMotor.configure(
-            new SparkMaxConfig().inverted(true),
-            ResetMode.kNoResetSafeParameters,
+            ShooterConstants.RIGHT_SHOOTER_MOTOR_CONFIG,
+            ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
     }
@@ -52,13 +51,13 @@ public class Shooter extends SubsystemBase {
     {
         hoodMotor.configure(
             ShooterConstants.HOOD_MOTOR_CONFIG,
-            ResetMode.kNoResetSafeParameters,
+            ResetMode.kResetSafeParameters,
             PersistMode.kNoPersistParameters
         );
     }
 
     public Shooter() {
-        adjustHood(HoodState.IDLE.speed);
+        adjustHood(HoodState.IDLE.dutyCycle);
     }
 
     @Override
@@ -76,13 +75,13 @@ public class Shooter extends SubsystemBase {
         // TODO: add code to preserve last hood angle with pid
     }
 
-    public void setSpeed(double speed) {
+    public void setVelocity(AngularVelocity velocity) {
         ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.reset(getAxleVelocity().in(RotationsPerSecond));
-        ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.setGoal(speed);
+        ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.setGoal(velocity.in(RotationsPerSecond));
     }
 
-    public void adjustHood(double speed) {
-        hoodMotor.set(speed);
+    public void adjustHood(double dutyCycle) {
+        hoodMotor.set(dutyCycle);
     }
 
     public boolean isShooterReady() {
@@ -117,12 +116,12 @@ public class Shooter extends SubsystemBase {
         @Override
         public void execute() {
             lastHoodAngle = hoodMotor.getEncoder().getPosition();
-            adjustHood(state.speed);
+            adjustHood(state.dutyCycle);
         }
 
         @Override
         public void end(boolean interrupted) {
-            adjustHood(HoodState.IDLE.speed);
+            adjustHood(HoodState.IDLE.dutyCycle);
         }
     } // end change hood command
 
@@ -137,12 +136,12 @@ public class Shooter extends SubsystemBase {
 
         @Override
         public void initialize() {
-            Shooter.this.setSpeed(shooterState.speed);
+            Shooter.this.setVelocity(shooterState.velocity);
         }
 
         @Override
         public void end(boolean interupted) {
-            Shooter.this.setSpeed(ShooterState.IDLE.speed);
+            Shooter.this.setVelocity(ShooterState.IDLE.velocity);
         }
     }
 }
