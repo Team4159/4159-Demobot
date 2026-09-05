@@ -1,13 +1,9 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
@@ -60,48 +56,18 @@ public class Shooter extends SubsystemBase {
         adjustHood(HoodState.IDLE.dutyCycle);
     }
 
-    @Override
-    public void periodic() {
-        if (ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.getGoal().position != 0.0) {
-            double motorVoltage = ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.calculate(
-                getAxleVelocity().in(RotationsPerSecond)
-            );
-            leftShooterMotor.setVoltage(motorVoltage);
-            rightShooterMotor.setVoltage(motorVoltage);
-        } else {
-            leftShooterMotor.stopMotor();
-            rightShooterMotor.stopMotor();
-        }
-        // TODO: add code to preserve last hood angle with pid
+    public void setDutyCycle(double dutyCycle) {
+        leftShooterMotor.set(dutyCycle);
+        rightShooterMotor.set(dutyCycle);
     }
 
-    public void setVelocity(AngularVelocity velocity) {
-        ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.reset(getAxleVelocity().in(RotationsPerSecond));
-        ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.setGoal(velocity.in(RotationsPerSecond));
+    public void stop() {
+        leftShooterMotor.stopMotor();
+        rightShooterMotor.stopMotor();
     }
 
     public void adjustHood(double dutyCycle) {
         hoodMotor.set(dutyCycle);
-    }
-
-    public boolean isShooterReady() {
-        if (ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.getGoal().velocity <= 0) {
-            // must be spinning in the positive direction to be shooting
-            return false;
-        }
-        return ShooterConstants.SHOOTER_PROFILED_PID_CONTROLLER.atGoal();
-    }
-
-    private AngularVelocity getAxleVelocity() {
-        return getLeftVelocity().plus(getRightVelocity()).div(2);
-    }
-
-    private AngularVelocity getLeftVelocity() {
-        return RPM.of(leftShooterMotor.getEncoder().getVelocity());
-    }
-
-    private AngularVelocity getRightVelocity() {
-        return RPM.of(rightShooterMotor.getEncoder().getVelocity());
     }
 
     public class AdjustHood extends Command {
@@ -136,12 +102,12 @@ public class Shooter extends SubsystemBase {
 
         @Override
         public void initialize() {
-            Shooter.this.setVelocity(shooterState.velocity);
+            Shooter.this.setDutyCycle(shooterState.dutyCycle);
         }
 
         @Override
         public void end(boolean interupted) {
-            Shooter.this.setVelocity(ShooterState.IDLE.velocity);
+            Shooter.this.setDutyCycle(ShooterState.IDLE.dutyCycle);
         }
     }
 }

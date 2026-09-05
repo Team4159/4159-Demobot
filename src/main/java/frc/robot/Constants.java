@@ -5,7 +5,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RPM;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -17,7 +16,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -79,12 +77,8 @@ public final class Constants {
             FEEDER_MOTOR_CONFIG.smartCurrentLimit(15);
             FEEDER_MOTOR_CONFIG.secondaryCurrentLimit(60);
             FEEDER_MOTOR_CONFIG.idleMode(IdleMode.kCoast);
-            LEFT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
-                false
-            );
-            RIGHT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
-                true
-            );
+            LEFT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(false);
+            RIGHT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(true);
         }
 
         public static enum FeederState {
@@ -154,18 +148,16 @@ public final class Constants {
             );
         }
 
-        public static final ProfiledPIDController SHOOTER_PROFILED_PID_CONTROLLER = new ProfiledPIDController(
-            2.5,
-            0,
-            0,
-            new TrapezoidProfile.Constraints(30, 60)
-        );
+        public static enum ShooterState {
+            IDLE(0.0),
+            SHOOT(0.75),
+            REVERSE(-0.15);
 
-        // used the value for spinTolerance from FRC-2024
-        public static final double SPIN_GOAL_TOLERANCE = 5;
+            public final double dutyCycle;
 
-        static {
-            SHOOTER_PROFILED_PID_CONTROLLER.setTolerance(ShooterConstants.SPIN_GOAL_TOLERANCE);
+            private ShooterState(double dutyCycle) {
+                this.dutyCycle = dutyCycle;
+            }
         }
 
         // hood angle ranges
@@ -193,23 +185,7 @@ public final class Constants {
             }
         }
 
-        // ----- tolerances: so if the motors/whatnot are a bit off, it'll still
-        // work------
-        // pitch refers to the angle
         public static final double HOOD_PITCH_TOLERANCE = Units.degreesToRotations(5);
-
-        // ENUMS
-        public static enum ShooterState {
-            IDLE(RPM.of(0.0)),
-            SHOOT(RPM.of(5000.0)),
-            REVERSE(RPM.of(-225.0));
-
-            public final AngularVelocity velocity;
-
-            private ShooterState(AngularVelocity velocity) {
-                this.velocity = velocity;
-            }
-        }
     }
 
     public static class RumbleConstants {
