@@ -39,8 +39,8 @@ public final class Constants {
 
     public static class ArcadeDriveConstants {
 
-        public static final double TRANSLATION_BUFFER_ANGLE = Units.degreesToRadians(15);
-        public static final double ROTATION_BUFFER_ANGLE = Units.degreesToRadians(15);
+        public static final double TRANSLATION_BUFFER_ANGLE = Units.degreesToRadians(15.0);
+        public static final double ROTATION_BUFFER_ANGLE = Units.degreesToRadians(15.0);
         public static final double INPUT_DEADZONE = 0.3;
     }
 
@@ -56,7 +56,7 @@ public final class Constants {
 
         static {
             DRIVETRAIN_MOTOR_CONFIG.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
-            DRIVETRAIN_MOTOR_CONFIG.CurrentLimits.withStatorCurrentLimit(80).withSupplyCurrentLimit(40);
+            DRIVETRAIN_MOTOR_CONFIG.CurrentLimits.withStatorCurrentLimit(40).withSupplyCurrentLimit(40);
 
             DRIVETRAIN_LEFT_MOTOR_CONFIG = DRIVETRAIN_MOTOR_CONFIG.clone();
             DRIVETRAIN_LEFT_MOTOR_CONFIG.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
@@ -75,7 +75,7 @@ public final class Constants {
 
         static {
             FEEDER_MOTOR_CONFIG.smartCurrentLimit(15);
-            FEEDER_MOTOR_CONFIG.secondaryCurrentLimit(60);
+            FEEDER_MOTOR_CONFIG.secondaryCurrentLimit(40);
             FEEDER_MOTOR_CONFIG.idleMode(IdleMode.kCoast);
             LEFT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(false);
             RIGHT_FEEDER_MOTOR_CONFIG = (SparkMaxConfig) FEEDER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(true);
@@ -104,14 +104,14 @@ public final class Constants {
 
         public static final double TURRET_MOTOR_GEAR_RATIO = 54.0;
 
-        public static final Angle TURRET_ANGLE_MINIMUM = Degrees.of(-45);
-        public static final Angle TURRET_ANGLE_MAXIMUM = Degrees.of(45);
+        public static final Angle TURRET_ANGLE_MINIMUM = Degrees.of(-45.0);
+        public static final Angle TURRET_ANGLE_MAXIMUM = Degrees.of(45.0);
 
         public static final SparkMaxConfig TURRET_MOTOR_CONFIG = new SparkMaxConfig();
 
         static {
-            TURRET_MOTOR_CONFIG.smartCurrentLimit(40);
-            TURRET_MOTOR_CONFIG.secondaryCurrentLimit(50);
+            TURRET_MOTOR_CONFIG.smartCurrentLimit(20);
+            TURRET_MOTOR_CONFIG.secondaryCurrentLimit(40);
             TURRET_MOTOR_CONFIG.idleMode(IdleMode.kBrake);
             TURRET_MOTOR_CONFIG.inverted(true);
         }
@@ -137,8 +137,8 @@ public final class Constants {
         public static final SparkMaxConfig LEFT_SHOOTER_MOTOR_CONFIG, RIGHT_SHOOTER_MOTOR_CONFIG;
 
         static {
-            SHOOTER_MOTOR_CONFIG.smartCurrentLimit(40);
-            SHOOTER_MOTOR_CONFIG.secondaryCurrentLimit(80);
+            SHOOTER_MOTOR_CONFIG.smartCurrentLimit(20);
+            SHOOTER_MOTOR_CONFIG.secondaryCurrentLimit(40);
             SHOOTER_MOTOR_CONFIG.idleMode(IdleMode.kCoast);
             LEFT_SHOOTER_MOTOR_CONFIG = (SparkMaxConfig) SHOOTER_MOTOR_CONFIG.apply(new SparkMaxConfig()).inverted(
                 false
